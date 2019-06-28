@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Update="@(ProjectReference)" OutputItemType="PotentialOutputs" Targets="GetTargetPath" ReferenceOutputAssembly="false" SkipGetTargetFrameworkProperties="true" />
+    <ProjectReference Update="@(ProjectReference)" OutputItemType="DelaySignTargetPaths" Targets="GetDelaySignTargetPath" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <Target Name="SetVsoBuildNumber" DependsOnTargets="GetBuildVersion" BeforeTargets="Build">
@@ -14,7 +14,7 @@
 
   <Target Name="SetVsoOutputs" AfterTargets="Build" >
     <ItemGroup>
-      <Outputs Include="@(PotentialOutputs)" Condition="Exists('%(FullPath)')" />
+      <Outputs Include="@(DelaySignTargetPaths)" Condition="Exists('%(FullPath)')" />
     </ItemGroup>
     <Message Importance="high" Text="##vso[task.setvariable variable=build.outputs;]@(Outputs, '|')" />
   </Target>

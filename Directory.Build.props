@@ -3,20 +3,15 @@
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
 
-    <!-- Prevent NerdBank from loading from mono (which omnisharp runs on on linux) /-->
-    <GenerateAssemblyVersionInfo Condition="'$(MSBuildRuntimeType)' == 'Mono'">false</GenerateAssemblyVersionInfo>
-  </PropertyGroup>
-
-  <PropertyGroup Label="Signing" Condition="'$(PublicRelease)' == 'true'">
-    <SignAssembly>true</SignAssembly>
-    <DelaySign>true</DelaySign>
+    <!-- Prevent NerdBank from loading in mono (which omnisharp uses on linux) /-->
+    <GenerateAssemblyVersionInfo Condition="'$(MSBuildRuntimeType)'=='Mono'">false</GenerateAssemblyVersionInfo>
   </PropertyGroup>
 
   <PropertyGroup Label="Assembly Info">
     <Company>Microsoft Corporation</Company>
     <Copyright>Copyright © $([System.DateTime]::Now.ToString(yyyy)) Microsoft Corporation. All rights reserved.</Copyright>
-    <Product Condition="'$(PublicRelease)' != 'true'">Microsoft ® - Private (Built by $(USERNAME) on $(COMPUTERNAME)).</Product>
-    <Product Condition="'$(PublicRelease)' == 'true'">Microsoft ® $(MSBuildProjectName)</Product>
+    <Product Condition="'$(PublicRelease)'!='true'">Microsoft ® - Private (Built by $(USERNAME) on $(COMPUTERNAME)).</Product>
+    <Product Condition="'$(PublicRelease)'=='true'">Microsoft ® $(MSBuildProjectName)</Product>
   </PropertyGroup>
 
   <PropertyGroup Label="Roslyn Analyzers">
@@ -25,13 +20,13 @@
 
     <!-- StyleCop settings -->
     <!-- This property is disabled by default in Directory.Build.props because StyleCop is not a SDL requirement. -->
-    <StyleCopEnabled Condition="'$(StyleCopEnabled)' == ''">true</StyleCopEnabled>
+    <StyleCopEnabled Condition="'$(StyleCopEnabled)'==''">true</StyleCopEnabled>
     <StyleCopTreatErrorsAsWarnings>false</StyleCopTreatErrorsAsWarnings>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Nerdbank.GitVersioning" Version="2.3.183" PrivateAssets="All" />
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.3" PrivateAssets="All"/>
-    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" PrivateAssets="All" Condition="'$(StyleCopEnabled)' == 'true'" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" PrivateAssets="All" Condition="'$(StyleCopEnabled)'=='true'" />
   </ItemGroup>
 </Project>
