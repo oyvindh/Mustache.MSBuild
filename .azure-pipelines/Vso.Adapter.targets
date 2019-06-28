@@ -1,0 +1,21 @@
+
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Update="@(ProjectReference)" OutputItemType="PotentialOutputs" Targets="GetTargetPath" ReferenceOutputAssembly="false" SkipGetTargetFrameworkProperties="true" />
+  </ItemGroup>
+
+  <Target Name="SetVsoBuildNumber" DependsOnTargets="GetBuildVersion" BeforeTargets="Build">
+    <Message Importance="high" Text="##vso[build.updatebuildnumber]$(PackageVersion)" />
+  </Target>
+
+  <Target Name="SetVsoOutputs" AfterTargets="Build" >
+    <ItemGroup>
+      <Outputs Include="@(PotentialOutputs)" Condition="Exists('%(FullPath)')" />
+    </ItemGroup>
+    <Message Importance="high" Text="##vso[task.setvariable variable=build.outputs;]@(Outputs, '|')" />
+  </Target>
+</Project>

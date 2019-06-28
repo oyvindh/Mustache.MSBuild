@@ -1,0 +1,17 @@
+version: "3"
+
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ..:/workspace:rw
+      - home:/root:rw
+    entrypoint: tail -f /dev/null
+    environment:
+      - DOTNET_USE_POLLING_FILE_WATCHER=true
+      - NUGET_CREDENTIALPROVIDER_SESSIONTOKENCACHE_ENABLED=true
+      - ASPNETCORE_ENVIRONMENT=Development
+volumes:
+  home:
