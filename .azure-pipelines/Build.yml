@@ -1,15 +1,12 @@
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
 
-pool:
-  vmImage: 'ubuntu-latest'
-
 container: mcr.microsoft.com/dotnet/core/sdk:2.1.700
 
 variables:
   PackageFolder: '$(Build.ArtifactStagingDirectory)/target'
   AssemblyOriginatorKeyFile: '$(AssemblyOriginatorKeyFile.secureFilePath)'
-  PublicRelease: 'eq(variables['Build.SourceBranch'], 'refs/heads/master')'
+  PublicRelease: '$[ eq(variables['Build.SourceBranch'], 'refs/heads/master') ]'
   CreateHardLinksForCopyLocalIfPossible: '$(PublicRelease)'
 
 steps:
