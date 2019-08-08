@@ -4,20 +4,30 @@
 container: mcr.microsoft.com/dotnet/core/sdk:2.1.700
 
 variables:
+  PublicRelease: "$[ eq(variables['Build.SourceBranch'], 'refs/heads/master') ]"
   PackageFolder: '$(Build.ArtifactStagingDirectory)/target'
-  AssemblyOriginatorKeyFile: '$(AssemblyOriginatorKeyFile.secureFilePath)'
-  PublicRelease: '$[ eq(variables['Build.SourceBranch'], 'refs/heads/master') ]'
-  CreateHardLinksForCopyLocalIfPossible: '$(PublicRelease)'
+  AnalyzersLogDirectory: '$(Agent.BuildDirectory)/_sdt/logs/CodeAnalysisLogs'
 
 steps:
+- script: |
+    curl -L -o /tmp/powershell.tar.gz https://github.com/PowerShell/PowerShell/releases/download/v6.2.0/powershell-6.2.0-linux-x64.tar.gz
+    mkdir -p /tmp/microsoft/powershell/6.2.0
+    tar zxf /tmp/powershell.tar.gz -C /tmp/microsoft/powershell/6.2.0
+    chmod +x /tmp/microsoft/powershell/6.2.0/pwsh
+    echo "##vso[task.setvariable variable=PATH]$PATH:/tmp/microsoft/powershell/6.2.0"
+    echo "Powershell Core Installed"
+  displayName: 'Install Powershell Core'
+  condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
+
 - task: DownloadSecureFile@1
+  name: "AssemblyOriginatorKeyFile"
   displayName: 'Download Strong Name Public Key'
   inputs:
     secureFile: '$(SecureFileId)'
-  condition: 'and(succeeded(), $(PublicRelease))'
+  condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
 
 - task: DotNetCoreCLI@2
-  displayName: 'dotnet restore'
+  displayName: 'DotNet Restore'
   inputs:
     command: restore
     projects: dirs.proj
@@ -25,10 +35,10 @@ steps:
     nugetConfigPath: NuGet.config
 
 - task: DotNetCoreCLI@2
-  displayName: 'dotnet build'
+  displayName: 'DotNet Build'
   inputs:
     projects: dirs.proj
-    arguments: '--configuration Release --no-restore -warnaserror'
+    arguments: '-p:CreateHardLinksForCopyLocalIfPossible=$(PublicRelease) -p:AssemblyOriginatorKeyFile=$(AssemblyOriginatorKeyFile.secureFilePath) --configuration Release --no-restore -warnaserror'
 
 - task: PowerShell@2
   displayName: 'Process Build Outputs'
@@ -36,10 +46,10 @@ steps:
     targetType: filePath
     filePath: './.azure-pipelines/VsoAdapter.ps1'
     arguments: '-BuildOutputsEncoded "$(build.outputs)" -SourceDir "$(build.sourcesdirectory)"'
-  condition: 'and(succeeded(), $(PublicRelease))'
+  condition: and(succeeded(), variables['build.outputs'], eq(variables['PublicRelease'], 'True'))
 
 - task: DotNetCoreCLI@2
-  displayName: 'dotnet test'
+  displayName: 'DotNet Test'
   inputs:
     command: test
     projects: dirs.proj
@@ -103,7 +113,7 @@ steps:
              "toolVersion": "1.0"
          }
      ]
-  condition: 'and(succeeded(), $(PublicRelease))'
+  condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
 
 - task: PowerShell@2
   displayName: 'Fix Broken HardLinks'
@@ -111,17 +121,17 @@ steps:
     targetType: filePath
     filePath: './.azure-pipelines/VsoAdapter.ps1'
     arguments: '-HardlinksEncoded "$(build.taskinput.brokenhardlinks)" -SourceDir "$(build.sourcesdirectory)"'
-  condition: 'and(succeeded(), $(PublicRelease))'
+  condition: and(succeeded(), variables['build.taskinput.brokenhardlinks'], eq(variables['PublicRelease'], 'True'))
 
 - task: DotNetCoreCLI@2
-  displayName: 'dotnet pack'
+  displayName: 'DotNet Pack'
   inputs:
     command: pack
     packagesToPack: dirs.proj
     packDirectory: '$(PackageFolder)'
     nobuild: true
     verbosityPack: Minimal
-  condition: 'and(succeeded(), $(PublicRelease))'
+  condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
 
 - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
   displayName: 'ESRP CodeSigning Packages'
@@ -145,11 +155,24 @@ steps:
              "toolName": "sign",
              "toolVersion": "1.0"
          }]
-  condition: 'and(succeeded(), $(PublicRelease))'
+  condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: Packages'
   inputs:
     PathtoPublish: '$(PackageFolder)'
     ArtifactName: packages
-  condition: 'and(succeeded(), $(PublicRelease))'
+  condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: CodeAnalysisLogs'
+  inputs:
+    PathtoPublish: '$(AnalyzersLogDirectory)'
+    ArtifactName: CodeAnalysisLogs
+  condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
+
+- script: 'curl -X PATCH -u $(whoami):$SYSTEM_ACCESSTOKEN -H "Content-Type: application/json" -H "Accept: application/json;api-version=5.1" --data ''{"keepForever":true}'' "$(System.TeamFoundationCollectionUri)$(System.TeamProjectId)/_apis/build/builds/$(Build.BuildId)"'
+  displayName: 'Keep Forever'
+  env:
+    SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+  condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
