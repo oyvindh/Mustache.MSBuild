@@ -12,10 +12,12 @@
     <Message Importance="high" Text="##vso[build.updatebuildnumber]$(PackageVersion)" />
   </Target>
 
-  <Target Name="SetVsoOutputs" AfterTargets="Build" >
+  <Target Name="SetVsoOutputs" AfterTargets="Build" DependsOnTargets="ResolveProjectReferences">
     <ItemGroup>
-      <Outputs Include="@(DelaySignTargetPaths)" Condition="Exists('%(FullPath)')" />
+      <Outputs Include="@(DelaySignTargetPaths)" Condition="Exists('%(FullPath)')">
+        <RelativePath>$([MSBuild]::MakeRelative($(MSBuildProjectDirectory), %(FullPath)))</RelativePath>
+      </Outputs>
     </ItemGroup>
-    <Message Importance="high" Text="##vso[task.setvariable variable=build.outputs;]@(Outputs, '|')" />
+    <Message Importance="high" Text="##vso[task.setvariable variable=build.taskinput.sign;]@(Outputs->'%(RelativePath)', '%250D%250A')" />
   </Target>
 </Project>

@@ -15,7 +15,7 @@
     <AnalyzersLog>$(AnalyzersLogDirectory)\$(MSBuildProjectName).analyzers</AnalyzersLog>
   </PropertyGroup>
 
-  <!-- Outputs output target path if  -->
+  <!-- Outputs output target path if DelaySign is on -->
   <Target Name="GetDelaySignTargetPath" Returns="@(DelaySignTargetPath)">
     <ItemGroup>
       <DelaySignTargetPath Include="$(TargetPath)" Condition="'$(DelaySign)'=='true'" />
