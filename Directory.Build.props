@@ -14,6 +14,12 @@
     <Product Condition="'$(PublicRelease)'=='true'">Microsoft ® $(MSBuildProjectName)</Product>
   </PropertyGroup>
 
+  <PropertyGroup Label="Package Locking">
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <RestoreLockedMode>$(PublicRelease)</RestoreLockedMode>
+    <NuGetLockFilePath>$(MSBuildThisFileDirectory)packages.lock.json</NuGetLockFilePath>
+  </PropertyGroup>
+
   <PropertyGroup Label="Roslyn Analyzers">
     <!-- Roslyn analyzers settings -->
     <CodeAnalysisRuleset>$(MSBuildThisFileDirectory)\.config\CodeAnalysis.ruleset</CodeAnalysisRuleset>
