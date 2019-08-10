@@ -17,7 +17,6 @@
   <PropertyGroup Label="Package Locking">
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <RestoreLockedMode>$(PublicRelease)</RestoreLockedMode>
-    <NuGetLockFilePath>$(MSBuildThisFileDirectory)packages.lock.json</NuGetLockFilePath>
   </PropertyGroup>
 
   <PropertyGroup Label="Roslyn Analyzers">
