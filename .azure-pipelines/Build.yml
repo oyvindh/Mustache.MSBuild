@@ -9,6 +9,7 @@ variables:
   AnalyzersLogDirectory: '$(Agent.BuildDirectory)/_sdt/logs/CodeAnalysisLogs'
   BuildConfiguration: 'Release'
   AssemblyOriginatorKeyFile: '$(AssemblyOriginatorKeyFile.secureFilePath)'
+  NUGET_PACKAGES: '$(Pipeline.Workspace)/.nuget/packages'
 
 steps:
 
@@ -18,6 +19,15 @@ steps:
   inputs:
     secureFile: '$(SecureFileId)'
   condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
+
+- bash: echo "##vso[task.setvariable variable=nuget.cache.key]$(find -name packages.lock.json -exec md5sum '{}' + | sort -k 2 | md5sum)"
+  displayName: 'Calculate NuGet Cache Key'
+
+- task: CacheBeta@0
+  inputs:
+    key: $(nuget.cache.key)
+    path: $(NUGET_PACKAGES)
+  displayName: Cache NuGet packages
 
 - task: DotNetCoreCLI@2
   displayName: 'DotNet Restore'
