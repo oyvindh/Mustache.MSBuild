@@ -5,6 +5,7 @@ container: mcr.microsoft.com/dotnet/core/sdk:2.2.401
 
 variables:
   PublicRelease: "$[ eq(variables['Build.SourceBranch'], 'refs/heads/master') ]"
+  IsSigned: "$[ ne(variables['SecureFileId'], '') ]"
   PackageFolder: '$(Build.ArtifactStagingDirectory)/target'
   AnalyzersLogDirectory: '$(Agent.BuildDirectory)/_sdt/logs/CodeAnalysisLogs'
   BuildConfiguration: 'Release'
@@ -18,7 +19,7 @@ steps:
   displayName: 'Download Strong Name Public Key'
   inputs:
     secureFile: '$(SecureFileId)'
-  condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
+  condition: and(succeeded(), eq(variables['IsSigned'], 'True'))
 
 - task: DotNetCoreCLI@2
   displayName: 'DotNet Restore'
@@ -95,7 +96,7 @@ steps:
              "toolVersion": "1.0"
          }
      ]
-  condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
+  condition: and(succeeded(), eq(variables['IsSigned'], 'True'))
 
 - bash: 'find -L . -xtype l | while read -r l; do cp --remove-destination $(readlink $l) $l; done'
   displayName: 'Replace Symlinks'
@@ -141,7 +142,7 @@ steps:
              "toolName": "sign",
              "toolVersion": "1.0"
          }]
-  condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
+  condition: and(succeeded(), eq(variables['IsSigned'], 'True'))
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: Packages'

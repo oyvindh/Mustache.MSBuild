@@ -4,7 +4,7 @@
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
 
-  <PropertyGroup Label="Signing" Condition="'$(PublicRelease)'=='true' AND '$(IsTestProject)'!='true'">
+  <PropertyGroup Label="Signing" Condition="'$(IsSigned)'=='true' AND '$(IsTestProject)'!='true'">
     <SignAssembly>true</SignAssembly>
     <DelaySign>true</DelaySign>
   </PropertyGroup>
