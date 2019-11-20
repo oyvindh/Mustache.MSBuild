@@ -17,6 +17,9 @@
   <PropertyGroup Label="Publish Customizations">
     <!-- Publish should be opt-in per project -->
     <IsPublishable>false</IsPublishable>
+
+    <!-- Support publishing multiple projects to a common parent directory -->
+    <PublishDir Condition="'$(PublishBaseDir)'!=''">$(PublishBaseDir)\$(MSBuildProjectName)</PublishDir>
   </PropertyGroup>
 
   <PropertyGroup Label="Package Locking">
