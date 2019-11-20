@@ -14,6 +14,11 @@
     <Product Condition="'$(PublicRelease)'=='true'">Microsoft ® $(MSBuildProjectName)</Product>
   </PropertyGroup>
 
+  <PropertyGroup Label="Publish Customizations">
+    <!-- Publish should be opt-in per project -->
+    <IsPublishable>false</IsPublishable>
+  </PropertyGroup>
+
   <PropertyGroup Label="Package Locking">
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <RestoreLockedMode>$(PublicRelease)</RestoreLockedMode>
@@ -30,8 +35,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Nerdbank.GitVersioning" Version="3.0.24" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.4" PrivateAssets="All"/>
+    <PackageReference Include="Nerdbank.GitVersioning" Version="3.0.28" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.7" PrivateAssets="All"/>
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" PrivateAssets="All" Condition="'$(StyleCopEnabled)'=='true'" />
   </ItemGroup>
 </Project>
