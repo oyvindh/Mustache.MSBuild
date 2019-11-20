@@ -127,7 +127,7 @@ steps:
     command: 'publish'
     publishWebProjects: false
     projects: 'dirs.proj'
-    arguments: '--no-build -p:PublishBaseDir=$(PublishFolder)'
+    arguments: '--no-build -c $(BuildConfiguration) -p:PublishBaseDir=$(PublishFolder)'
     zipAfterPublish: false
     modifyOutputPath: false
   condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
