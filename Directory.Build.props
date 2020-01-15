@@ -23,7 +23,7 @@
   </PropertyGroup>
 
   <PropertyGroup Label="Package Locking">
-    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <RestorePackagesWithLockFile>false</RestorePackagesWithLockFile>
     <RestoreLockedMode>$(PublicRelease)</RestoreLockedMode>
   </PropertyGroup>
 
