@@ -38,8 +38,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Nerdbank.GitVersioning" Version="3.0.50" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.8" PrivateAssets="All"/>
+    <PackageReference Include="Nerdbank.GitVersioning" Version="3.0.28" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.7" PrivateAssets="All"/>
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" PrivateAssets="All" Condition="'$(StyleCopEnabled)'=='true'" />
   </ItemGroup>
 </Project>
