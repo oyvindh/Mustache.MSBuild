@@ -121,17 +121,6 @@ steps:
     verbosityPack: Normal
   condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
 
-- task: DotNetCoreCLI@2
-  displayName: 'DotNet Publish'
-  inputs:
-    command: 'publish'
-    publishWebProjects: false
-    projects: 'dirs.proj'
-    arguments: '--no-build -c $(BuildConfiguration) -p:PublishBaseDir=$(PublishFolder)'
-    zipAfterPublish: false
-    modifyOutputPath: false
-  condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
-
 - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
   displayName: 'ESRP CodeSigning Packages'
   inputs:
@@ -161,13 +150,6 @@ steps:
   inputs:
     PathtoPublish: '$(PackageFolder)'
     ArtifactName: packages
-  condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
-
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact: Publish'
-  inputs:
-    PathtoPublish: '$(PublishFolder)'
-    ArtifactName: publish
   condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
 
 - task: PublishBuildArtifacts@1
