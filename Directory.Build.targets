@@ -11,7 +11,7 @@
   
   <PropertyGroup Label="Analyzers Log Output">
     <AnalyzersLogDirectory Condition="'$(AnalyzersLogDirectory)'==''">$(IntermediateOutputPath)\CodeAnalysisLogs\</AnalyzersLogDirectory>
-    <ErrorLog>$(AnalyzersLogDirectory)\$(MSBuildProjectName).sarif</ErrorLog>
+    <ErrorLog>$(AnalyzersLogDirectory)\$(MSBuildProjectName).sarif,version=2.1</ErrorLog>
     <AnalyzersLog>$(AnalyzersLogDirectory)\$(MSBuildProjectName).analyzers</AnalyzersLog>
   </PropertyGroup>
 
