@@ -5,7 +5,7 @@ container: mcr.microsoft.com/dotnet/core/sdk:2.2.401
 
 variables:
   PublicRelease: "$[ eq(variables['Build.SourceBranch'], 'refs/heads/master') ]"
-  IsSigned: "$[ eq(variables['Build.SourceBranch'], 'refs/heads/master') ]"
+  IsSigned: "$[ and(eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq(variables['IsSigned'], 'True')) ]"
   PackageFolder: '$(Build.ArtifactStagingDirectory)/packages'
   PublishFolder: '$(Build.ArtifactStagingDirectory)/publish'
   AnalyzersLogDirectory: '$(Agent.BuildDirectory)/_sdt/logs/CodeAnalysisLogs'
