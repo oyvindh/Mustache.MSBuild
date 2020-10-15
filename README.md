@@ -13,3 +13,7 @@ This repository is the .NET baseline. It bootstraps the development of .NET Full
 ## Adding new projects
 
 `dotnet new`
+
+## Azure DebOps build specifics
+
+Read the [README](.azure-pipelines/README.md) to understand more about how this integrates with Azure DevOps
