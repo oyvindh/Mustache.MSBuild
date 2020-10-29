@@ -1,7 +1,7 @@
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
 
-container: mcr.microsoft.com/dotnet/core/sdk:2.2.401
+container: mcr.microsoft.com/dotnet/core/sdk:3.1
 
 variables:
   PublicRelease: "$[ eq(variables['Build.SourceBranch'], 'refs/heads/master') ]"
