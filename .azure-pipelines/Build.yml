@@ -24,6 +24,22 @@ steps:
     secureFile: '$(SecureFileId)'
   condition: and(succeeded(), eq(variables['IsSigned'], 'True'))
 
+- task: UseDotNet@2
+  displayName: 'Use .NET Core sdk'
+  inputs:
+    packageType: sdk
+    version: 3.1.300
+    installationPath: $(Agent.ToolsDirectory)/dotnet
+  condition: and(succeeded(), eq(variables['IsSigned'], 'True'))
+
+- task: UseDotNet@2
+  displayName: 'Use .NET Core sdk'
+  inputs:
+    packageType: sdk
+    version: 2.2.207
+    installationPath: $(Agent.ToolsDirectory)/dotnet
+  condition: and(succeeded(), eq(variables['IsSigned'], 'True'))
+
 - task: DotNetCoreCLI@2
   displayName: 'DotNet Restore'
   inputs:
