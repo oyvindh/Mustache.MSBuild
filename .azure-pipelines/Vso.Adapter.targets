@@ -5,19 +5,120 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Update="@(ProjectReference)" OutputItemType="DelaySignTargetPaths" Targets="GetDelaySignTargetPath" ReferenceOutputAssembly="false" />
+    <ProjectReference Update="@(ProjectReference)" OutputItemType="BuildOutputs" Targets="InspectBuildOutputs" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <Target Name="SetVsoBuildNumber" DependsOnTargets="GetBuildVersion" BeforeTargets="Build">
     <Message Importance="high" Text="##vso[build.updatebuildnumber]$(PackageVersion)" />
   </Target>
 
-  <Target Name="SetVsoOutputs" AfterTargets="Build" DependsOnTargets="ResolveProjectReferences">
+  <Target Name="SetSignStagingDir">
+    <PropertyGroup>
+      <DelaySignStagingFolder Condition="'$(DelaySignStagingFolder)' == ''">$(IntermediateOutputPath)DelaySignStaging\</DelaySignStagingFolder>
+      <DelaySignedLinkOutputPath Condition="'$(DelaySignedLinkOutputPath)' == ''">$(DelaySignStagingFolder)Links\</DelaySignedLinkOutputPath>
+      <DelaySignedOutputPath Condition="'$(DelaySignedOutputPath)' == ''">$(DelaySignStagingFolder)Files\</DelaySignedOutputPath>
+      <DelaySignStagingFolder Condition="'$(DelaySignStagingFolder)' != '' and !HasTrailingSlash('$(DelaySignStagingFolder)')">$(DelaySignStagingFolder)\</DelaySignStagingFolder>
+      <DelaySignedLinkOutputPath Condition="'$(DelaySignedLinkOutputPath)' != '' and !HasTrailingSlash('$(DelaySignedLinkOutputPath)')">$(DelaySignedLinkOutputPath)\</DelaySignedLinkOutputPath>
+      <DelaySignedOutputPath Condition="'$(DelaySignedOutputPath)' != '' and !HasTrailingSlash('$(DelaySignedOutputPath)')">$(DelaySignedOutputPath)\</DelaySignedOutputPath>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="CollectBuildOutputs" AfterTargets="Build" DependsOnTargets="ResolveProjectReferences;SetSignStagingDir">
     <ItemGroup>
-      <Outputs Include="@(DelaySignTargetPaths)" Condition="Exists('%(FullPath)')">
-        <RelativePath>$([MSBuild]::MakeRelative($(MSBuildProjectDirectory), %(FullPath)))</RelativePath>
-      </Outputs>
+      <DelaySignedOutputs Include="@(BuildOutputs)" Condition="'%(IsDelaySigned)' == 'true' and Exists('%(FullPath)')">
+        <OutputOriginalPath>$(DelaySignedLinkOutputPath)%(FullFileName).original</OutputOriginalPath>
+        <OutputCopiesPath>$(DelaySignedLinkOutputPath)%(FullFileName).copies</OutputCopiesPath>
+      </DelaySignedOutputs>
+      <CopiedReferences Include="@(BuildOutputs)" Condition="'%(IsCopiedReference)' == 'true'" />
     </ItemGroup>
-    <Message Importance="high" Text="##vso[task.setvariable variable=build.taskinput.sign;]@(Outputs->'%(RelativePath)', '%250D%250A')" />
+  </Target>
+
+  <Target Name="WriteBuildOutputs" AfterTargets="Build" DependsOnTargets="CollectBuildOutputs" Inputs="@(DelaySignedOutputs)" Outputs="%(OutputOriginalPath);%(OutputCopiesPath)">
+    <PropertyGroup>
+      <DelaySignedOutput>%(DelaySignedOutputs.FullFileName)</DelaySignedOutput>
+    </PropertyGroup>
+    <WriteLinesToFile
+      File="%(DelaySignedOutputs.OutputOriginalPath)"
+      Lines="%(DelaySignedOutputs.FullPath)"
+      Overwrite="true"
+      Encoding="Unicode"/>
+    <WriteLinesToFile
+      File="%(DelaySignedOutputs.OutputCopiesPath)"
+      Lines="@(CopiedReferences->WithMetadataValue('FullFileName', '$(DelaySignedOutput)'))"
+      Overwrite="true"
+      Encoding="Unicode"/>
+  </Target>
+
+  <Target Name="PrepareDelaySignedFiles" AfterTargets="Build" DependsOnTargets="WriteBuildOutputs">
+    <ItemGroup>
+      <DelaySignedLinks Include="$(DelaySignedLinkOutputPath)*.original" />
+    </ItemGroup>
+
+    <ReadLinesFromFile File="%(DelaySignedLinks.FullPath)" Condition="Exists('%(DelaySignedLinks.FullPath)')">
+      <Output TaskParameter="Lines" ItemName="DelaySignedFiles" />
+    </ReadLinesFromFile>
+
+    <Copy
+      SourceFiles = "@(DelaySignedFiles)"
+      DestinationFolder="$(DelaySignedOutputPath)"
+      SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
+      OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+      Retries="$(CopyRetryCount)"
+      RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
+      UseHardlinksIfPossible="$(CreateHardLinksForPublishFilesIfPossible)"
+      UseSymboliclinksIfPossible="$(CreateSymbolicLinksForPublishFilesIfPossible)" />
+  </Target>
+
+  <Target Name="CopySignedFiles">
+    <ItemGroup>
+      <DelaySignedLinks Include="$(DelaySignedLinkOutputPath)*.original" />
+    </ItemGroup>
+
+    <ReadLinesFromFile File="%(DelaySignedLinks.Identity)">
+      <Output TaskParameter="Lines" ItemName="DelaySignedFiles" />
+    </ReadLinesFromFile>
+
+    <Copy
+      SourceFiles="@(DelaySignedFiles)"
+      DestinationFolder="$(DelaySignedOutputPath)"
+      SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
+      OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+      Retries="$(CopyRetryCount)"
+      RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
+      UseHardlinksIfPossible="$(CreateHardLinksForPublishFilesIfPossible)"
+      UseSymboliclinksIfPossible="$(CreateSymbolicLinksForPublishFilesIfPossible)" />
+  </Target>
+
+  <Target Name="CopySignedFiles" DependsOnTargets="SetSignStagingDir">
+    <ItemGroup>
+      <SignStagedFiles Include="$(DelaySignedOutputPath)*" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="CopySignedFile" AfterTargets="CopySignedFiles" Inputs="@(SignStagedFiles)" Outputs="%(Identity).Fake">
+    <PropertyGroup>
+      <SignedFile>%(SignStagedFiles.FullPath)</SignedFile>
+      <SignedFullFileName>%(SignStagedFiles.FileName)%(SignStagedFiles.Extension)</SignedFullFileName>
+    </PropertyGroup>
+
+    <ReadLinesFromFile File="$(DelaySignedLinkOutputPath)$(SignedFullFileName).original">
+      <Output TaskParameter="Lines" ItemName="SignFileTargets" />
+    </ReadLinesFromFile>
+    <ReadLinesFromFile File="$(DelaySignedLinkOutputPath)$(SignedFullFileName).copies">
+      <Output TaskParameter="Lines" ItemName="SignFileTargets" />
+    </ReadLinesFromFile>
+
+    <Message Importance="high" Text="Copying signed file from '$(SignedFile)' to:" />
+    <Message Importance="high" Text="  %(SignFileTargets.FullPath)" />
+
+    <Copy
+      SourceFiles="@(SignFileTargets->'$(SignedFile)')"
+      DestinationFiles="%(FullPath)"
+      SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
+      OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+      Retries="$(CopyRetryCount)"
+      RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
+      UseHardlinksIfPossible="$(CreateHardLinksForPublishFilesIfPossible)"
+      UseSymboliclinksIfPossible="$(CreateSymbolicLinksForPublishFilesIfPossible)" />
   </Target>
 </Project>

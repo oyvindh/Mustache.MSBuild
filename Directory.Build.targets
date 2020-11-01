@@ -15,13 +15,25 @@
     <AnalyzersLog>$(AnalyzersLogDirectory)\$(MSBuildProjectName).analyzers</AnalyzersLog>
   </PropertyGroup>
 
-  <!-- Outputs output target path if DelaySign is on -->
-  <Target Name="GetDelaySignTargetPath" Returns="@(DelaySignTargetPath)">
+  <!-- Returns an overview of build generated outputs -->
+  <Target Name="InspectBuildOutputs" Returns="@(BuildOutputs)">
+    <Message Importance="high" Text="Inspecting build outputs for $(TargetPath)" />
     <ItemGroup>
-      <DelaySignTargetPath Include="$(TargetPath)" Condition="'$(DelaySign)'=='true'" />
+      <BuildOutputs Include="$(TargetPath)">
+        <IsCopiedReference>false</IsCopiedReference>
+        <IsDelaySigned>false</IsDelaySigned>
+        <IsDelaySigned Condition="'$(DelaySign)'=='true'">true</IsDelaySigned>
+        <FullFileName>$(TargetFileName)</FullFileName>
+      </BuildOutputs>
+      
+      <BuildOutputs Include="@(ReferencesCopiedInThisBuild->'%(FullPath)')">
+        <IsCopiedReference>true</IsCopiedReference>
+        <IsDelaySigned>false</IsDelaySigned>
+        <FullFileName>%(FileName)%(Extension)</FullFileName>
+      </BuildOutputs>
     </ItemGroup>
   </Target>
-
+  
   <Target Name="CreateDirectories" BeforeTargets="CoreCompile">
     <MakeDir Directories="$(AnalyzersLogDirectory)"/>  
   </Target>

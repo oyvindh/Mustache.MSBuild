@@ -5,9 +5,11 @@ container: mcr.microsoft.com/dotnet/core/sdk:3.1
 
 variables:
   PublicRelease: "$[ eq(variables['Build.SourceBranch'], 'refs/heads/master') ]"
-  IsSigned: "$[ and(eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq(variables['IsSigned'], 'True')) ]"
+  IsSigned: "$[ and(eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq(variables['Sign'], 'True')) ]"
   PackageFolder: '$(Build.ArtifactStagingDirectory)/packages'
   PublishFolder: '$(Build.ArtifactStagingDirectory)/publish'
+  DelaySignedOutputPath: '$(Build.ArtifactStagingDirectory)/assemblies'
+  DelaySignedLinkOutputPath: '$(Build.ArtifactStagingDirectory)/links'
   AnalyzersLogDirectory: '$(Agent.BuildDirectory)/_sdt/logs/CodeAnalysisLogs'
   BuildConfiguration: 'Release'
   AssemblyOriginatorKeyFile: '$(AssemblyOriginatorKeyFile.secureFilePath)'
@@ -42,9 +44,8 @@ steps:
   displayName: 'ESRP CodeSigning dlls'
   inputs:
     ConnectedServiceName: '$(EsrpEndpointName)'
-    FolderPath: '$(build.sourcesdirectory)'
-    Pattern: '$(build.taskinput.sign)'
-    UseMinimatch: true
+    FolderPath: '$(DelaySignedOutputPath)'
+    Pattern: '*.dll'
     signConfigType: inlineSignParams
     inlineOperation: |
      [{
@@ -99,8 +100,13 @@ steps:
      ]
   condition: and(succeeded(), eq(variables['IsSigned'], 'True'))
 
-- bash: 'find -L . -xtype l | while read -r l; do cp --remove-destination $(readlink $l) $l; done'
-  displayName: 'Replace Symlinks'
+- task: DotNetCoreCLI@2
+  displayName: 'Restore Signed dlls'
+  inputs:
+    command: 'custom'
+    projects: 'dirs.proj'
+    custom: 'msbuild'
+    arguments: '-target:CopySignedFiles'
   condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
 
 - task: DotNetCoreCLI@2
