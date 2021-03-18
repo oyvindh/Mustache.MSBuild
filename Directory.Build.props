@@ -37,6 +37,10 @@
     <StyleCopTreatErrorsAsWarnings>false</StyleCopTreatErrorsAsWarnings>
   </PropertyGroup>
 
+  <ItemGroup Label="Dockerfile Publish Convention">
+    <None Include="Dockerfile" CopyToOutputDirectory="PreserveNewest" Condition="Exists('Dockerfile')" />
+  </ItemGroup>
+  
   <ItemGroup>
     <PackageReference Include="Nerdbank.GitVersioning" Version="3.3.37" PrivateAssets="All" />
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.3.0" PrivateAssets="All"/>
