@@ -1,14 +1,13 @@
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
-
-container: mcr.microsoft.com/dotnet/sdk:5.0
-
 variables:
   - group: InfoSec-SecurityResults
   - name: PublicRelease
     value: "$[ eq(variables['Build.SourceBranch'], 'refs/heads/main') ]"
   - name: IsSigned
     value: "$[ and(eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['Sign'], 'True')) ]"
+  - name: UseHera
+    value: "$[ and(eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['Hera'], 'True')) ]"
   - name: PackageFolder
     value: '$(Build.ArtifactStagingDirectory)/packages'
   - name: PublishFolder
@@ -26,207 +25,221 @@ variables:
   - name: NUGET_PACKAGES
     value: '$(Pipeline.Workspace)/.nuget/packages'
 
-stages:
-- stage: main
-  jobs:
-  - job: mainJob
-    displayName: "Build, Sign and Test"
-    steps:
-    - task: DownloadSecureFile@1
+jobs:
+- job: mainJob
+  displayName: "Build, Sign and Test"
+  container: mcr.microsoft.com/dotnet/sdk:5.0
+  steps:
+  - task: DownloadSecureFile@1
     name: "AssemblyOriginatorKeyFile"
     displayName: 'Download Strong Name Public Key'
     inputs:
       secureFile: '$(SecureFileId)'
     condition: and(succeeded(), eq(variables['IsSigned'], 'True'))
 
-    - task: UseDotNet@2
-      displayName: 'Use .NET Core sdk'
-      inputs:
-        packageType: sdk
-        version: 5.0.301
-        installationPath: $(Agent.ToolsDirectory)/dotnet
-      condition: and(succeeded(), eq(variables['IsSigned'], 'True'))
+  - task: UseDotNet@2
+    displayName: 'Use .NET Core sdk'
+    inputs:
+      packageType: sdk
+      version: 5.0.301
+      installationPath: $(Agent.ToolsDirectory)/dotnet
+    condition: and(succeeded(), eq(variables['IsSigned'], 'True'))
 
-    - task: UseDotNet@2
-      displayName: 'Use .NET Core sdk'
-      inputs:
-        packageType: sdk
-        version: 2.2.207
-        installationPath: $(Agent.ToolsDirectory)/dotnet
-      condition: and(succeeded(), eq(variables['IsSigned'], 'True'))
+  - task: UseDotNet@2
+    displayName: 'Use .NET Core sdk'
+    inputs:
+      packageType: sdk
+      version: 2.2.207
+      installationPath: $(Agent.ToolsDirectory)/dotnet
+    condition: and(succeeded(), eq(variables['IsSigned'], 'True'))
 
-    - task: DotNetCoreCLI@2
-      displayName: 'DotNet Restore'
-      inputs:
-        command: restore
-        projects: dirs.proj
-        feedsToUse: config
-        nugetConfigPath: NuGet.config
-        verbosityRestore: Normal
+  - task: DotNetCoreCLI@2
+    displayName: 'DotNet Restore'
+    inputs:
+      command: restore
+      projects: dirs.proj
+      feedsToUse: config
+      nugetConfigPath: NuGet.config
+      verbosityRestore: Normal
 
-    - task: DotNetCoreCLI@2
-      displayName: 'DotNet Build'
-      inputs:
-        command: build
-        projects: dirs.proj
-        arguments: '--configuration $(BuildConfiguration) -p:CreateSymbolicLinksForCopyLocalIfPossible=$(PublicRelease) --no-restore -warnaserror -v n'
+  - task: DotNetCoreCLI@2
+    displayName: 'DotNet Build'
+    inputs:
+      command: build
+      projects: dirs.proj
+      arguments: '--configuration $(BuildConfiguration) -p:CreateSymbolicLinksForCopyLocalIfPossible=$(PublicRelease) --no-restore -warnaserror -v n'
 
-    - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
-      displayName: 'ESRP CodeSigning dlls'
-      inputs:
-        ConnectedServiceName: '$(EsrpEndpointName)'
-        FolderPath: '$(DelaySignedOutputPath)'
-        Pattern: '*.dll'
-        signConfigType: inlineSignParams
-        inlineOperation: |
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    displayName: 'ESRP CodeSigning dlls'
+    inputs:
+      ConnectedServiceName: '$(EsrpEndpointName)'
+      FolderPath: '$(DelaySignedOutputPath)'
+      Pattern: '*.dll'
+      signConfigType: inlineSignParams
+      inlineOperation: |
         [{
-                "keyCode": "CP-233863-SN",
-                "operationSetCode": "StrongNameSign",
-                "parameters": [ ],
-                "toolName": "sign",
-                "toolVersion": "1.0"
-            },
-            {
-                "keyCode": "CP-233863-SN",
-                "operationSetCode": "StrongNameVerify",
-                "parameters": [ ],
-                "toolName": "sign",
-                "toolVersion": "1.0"
-            },
+          "keyCode": "CP-233863-SN",
+          "operationSetCode": "StrongNameSign",
+          "parameters": [ ],
+          "toolName": "sign",
+          "toolVersion": "1.0"
+        },
         {
-                "keyCode": "CP-230012",
-                "operationSetCode": "SigntoolSign",
-                "parameters": [
-                {
-                    "parameterName": "OpusName",
-                    "parameterValue": "Microsoft"
-                },
-                {
-                    "parameterName": "OpusInfo",
-                    "parameterValue": "http://www.microsoft.com"
-                },
-                {
-                    "parameterName": "FileDigest",
-                    "parameterValue": "/fd \"SHA256\""
-                },
-                {
-                    "parameterName": "PageHash",
-                    "parameterValue": "/NPH"
-                },
-                {
-                    "parameterName": "TimeStamp",
-                    "parameterValue": "/tr \"http://rfc3161.gtm.corp.microsoft.com/TSS/HttpTspServer\" /td sha256"
-                }
-                ],
-                "toolName": "sign",
-                "toolVersion": "1.0"
-            },
-            {
-                "keyCode": "CP-230012",
-                "operationSetCode": "SigntoolVerify",
-                "parameters": [ ],
-                "toolName": "sign",
-                "toolVersion": "1.0"
-            }
-        ]
-      condition: and(succeeded(), eq(variables['IsSigned'], 'True'))
+          "keyCode": "CP-233863-SN",
+          "operationSetCode": "StrongNameVerify",
+          "parameters": [ ],
+          "toolName": "sign",
+          "toolVersion": "1.0"
+        },
+        {
+          "keyCode": "CP-230012",
+          "operationSetCode": "SigntoolSign",
+          "parameters": [
+          {
+              "parameterName": "OpusName",
+              "parameterValue": "Microsoft"
+          },
+          {
+              "parameterName": "OpusInfo",
+              "parameterValue": "http://www.microsoft.com"
+          },
+          {
+              "parameterName": "FileDigest",
+              "parameterValue": "/fd \"SHA256\""
+          },
+          {
+              "parameterName": "PageHash",
+              "parameterValue": "/NPH"
+          },
+          {
+              "parameterName": "TimeStamp",
+              "parameterValue": "/tr \"http://rfc3161.gtm.corp.microsoft.com/TSS/HttpTspServer\" /td sha256"
+          }
+          ],
+          "toolName": "sign",
+          "toolVersion": "1.0"
+        },
+        {
+          "keyCode": "CP-230012",
+          "operationSetCode": "SigntoolVerify",
+          "parameters": [ ],
+          "toolName": "sign",
+          "toolVersion": "1.0"
+        }]
+    condition: and(succeeded(), eq(variables['IsSigned'], 'True'))
 
-    - task: DotNetCoreCLI@2
-      displayName: 'Restore Signed dlls'
-      inputs:
-        command: 'custom'
-        projects: 'dirs.proj'
-        custom: 'msbuild'
-        arguments: '-target:CopySignedFiles'
-      condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
+  - task: DotNetCoreCLI@2
+    displayName: 'Restore Signed dlls'
+    inputs:
+      command: 'custom'
+      projects: 'dirs.proj'
+      custom: 'msbuild'
+      arguments: '-target:CopySignedFiles'
+    condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
 
-    - task: DotNetCoreCLI@2
-      displayName: 'DotNet Test'
-      inputs:
-        command: test
-        projects: dirs.proj
-        arguments: '--configuration $(BuildConfiguration) --no-build -v n'
+  - task: DotNetCoreCLI@2
+    displayName: 'DotNet Test'
+    inputs:
+      command: test
+      projects: dirs.proj
+      arguments: '--configuration $(BuildConfiguration) --no-build -v n'
 
-    - task: DotNetCoreCLI@2
-      displayName: 'DotNet Pack'
-      inputs:
-        command: pack
-        packagesToPack: dirs.proj
-        configuration: $(BuildConfiguration)
-        nobuild: true
-        packDirectory: '$(PackageFolder)'
-        verbosityPack: Normal
-      condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
+  - task: DotNetCoreCLI@2
+    displayName: 'DotNet Pack'
+    inputs:
+      command: pack
+      packagesToPack: dirs.proj
+      configuration: $(BuildConfiguration)
+      nobuild: true
+      packDirectory: '$(PackageFolder)'
+      verbosityPack: Normal
+    condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
 
-    - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
-      displayName: 'ESRP CodeSigning Packages'
-      inputs:
-        ConnectedServiceName: '$(EsrpEndpointName)'
-        FolderPath: '$(PackageFolder)'
-        Pattern: '*.nupkg'
-        signConfigType: inlineSignParams
-        inlineOperation: |
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    displayName: 'ESRP CodeSigning Packages'
+    inputs:
+      ConnectedServiceName: '$(EsrpEndpointName)'
+      FolderPath: '$(PackageFolder)'
+      Pattern: '*.nupkg'
+      signConfigType: inlineSignParams
+      inlineOperation: |
         [{
-                "keyCode": "CP-401405",
-                "operationSetCode": "NuGetSign",
-                "parameters": [ ],
-                "toolName": "sign",
-                "toolVersion": "1.0"
-            },
-            {
-                "keyCode": "CP-401405",
-                "operationSetCode": "NuGetVerify",
-                "parameters": [ ],
-                "toolName": "sign",
-                "toolVersion": "1.0"
-            }]
-      condition: and(succeeded(), eq(variables['IsSigned'], 'True'))
+          "keyCode": "CP-401405",
+          "operationSetCode": "NuGetSign",
+          "parameters": [ ],
+          "toolName": "sign",
+          "toolVersion": "1.0"
+        },
+        {
+          "keyCode": "CP-401405",
+          "operationSetCode": "NuGetVerify",
+          "parameters": [ ],
+          "toolName": "sign",
+          "toolVersion": "1.0"
+        }]
+    condition: and(succeeded(), eq(variables['IsSigned'], 'True'))
 
-    - task: PublishBuildArtifacts@1
-      displayName: 'Publish Artifact: Packages'
-      inputs:
-        PathtoPublish: '$(PackageFolder)'
-        ArtifactName: packages
-      condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Packages'
+    inputs:
+      PathtoPublish: '$(PackageFolder)'
+      ArtifactName: packages
+    condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
 
-    - task: PublishBuildArtifacts@1
-      displayName: 'Publish Artifact: RoslynOutput'
-      inputs:
-        PathtoPublish: '$(AnalyzersLogDirectory)'
-        ArtifactName: RoslynOutput
-      condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: RoslynOutput'
+    inputs:
+      PathtoPublish: '$(AnalyzersLogDirectory)'
+      ArtifactName: RoslynOutput
+    condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
 
-- stage: codeAnalysisLogs
-  condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
-  jobs:
-  - job: codeAnalysisLogsJob
-    displayName: "Code analysis log handling (extra tasks for Hera)"
-    steps:
-    - task: DownloadPipelineArtifact@2
-      displayName: 'Download Pipeline Artifact RoslynOutput'
-      inputs:
-        artifactName: RoslynOutput
-        targetPath: '$(Pipeline.Workspace)\RoslynOutput'
+  # The Guardian tasks write stuff in the root of the agent, in docker that requires root privileges
+  #- task: Bash@3
+  #  inputs:
+  #    targetType: 'inline'
+  #    script: "echo $AGENT_ROOTDIRECTORY && sudo chmod a+x $AGENT_ROOTDIRECTORY"
+  #  condition: eq(variables['Agent.Os'], 'Linux')
 
-    - task: NodeTool@0
+- job: codeAnalysisLogsJob
+  dependsOn: mainJob
+  container: mcr.microsoft.com/dotnet/sdk:5.0
+  condition: and(succeeded(), eq(variables['UseHera'], 'True'))
+  displayName: "Code analysis log handling (extra tasks for Hera)"
+  steps:
+  - task: DownloadPipelineArtifact@2
+    displayName: 'Download Pipeline Artifact RoslynOutput'
+    inputs:
+      artifactName: RoslynOutput
+      targetPath: '$(Pipeline.Workspace)\RoslynOutput'
 
-    - task: securedevelopmentteam.vss-secure-development-tools.build-task-roslynanalyzers.RoslynAnalyzers@3
-      displayName: 'Run Roslyn Analyzers in copy logs mode'
-      inputs:
-        copyLogsOnly: true
-        logRootDirectory: '$(Pipeline.Workspace)\RoslynOutput'
+  - task: NodeTool@0
 
-    - task: securedevelopmentteam.vss-secure-development-tools.build-task-publishsecurityanalysislogs.PublishSecurityAnalysisLogs@3
-      displayName: 'Re-Publish Security Analysis Logs'
-      inputs:
-        ArtifactName: 'CodeAnalysisLogs'
-        ArtifactType: 'M365'
-        AllTools: true
-        ToolLogsNotFoundAction: 'Standard'
+  - task: UseDotNet@2
+    displayName: 'Use .NET Core sdk'
+    inputs:
+      packageType: sdk
+      version: 3.1.201
+      installationPath: $(Agent.ToolsDirectory)/dotnet
 
-    - task: dikalya.AssetRetention.asset-retention-task.AssetRetention@3
-      displayName: 'ARtifact Retention Orchestrator Workflow (ARROW)'
-      inputs:
-        ArrowServiceConnection: '$(ArrowEndpointName)'
-        AssetGroupName: '$(System.TeamProject)_$(build.pipeline)'
-        DropsToRetain: CodeAnalysisLogs
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-roslynanalyzers.RoslynAnalyzers@3
+    displayName: 'Run Roslyn Analyzers in copy logs mode'
+    inputs:
+      copyLogsOnly: true
+      logRootDirectory: '$(Pipeline.Workspace)\RoslynOutput'
+
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-publishsecurityanalysislogs.PublishSecurityAnalysisLogs@3
+    displayName: 'Re-Publish Security Analysis Logs'
+    inputs:
+      ArtifactName: 'CodeAnalysisLogs'
+      ArtifactType: 'M365'
+      AllTools: true
+      ToolLogsNotFoundAction: 'Standard'
+
+  - task: dikalya.AssetRetention.asset-retention-task.AssetRetention@3
+    displayName: 'ARtifact Retention Orchestrator Workflow (ARROW)'
+    inputs:
+      ArrowServiceConnection: '$(ArrowEndpointName)'
+      AssetGroupName: '$(System.TeamProject)_$(build.pipeline)'
+      DropsToRetain: CodeAnalysisLogs
+    env:
+      SYSTEM_ACCESSTOKEN: $(System.AccessToken)
