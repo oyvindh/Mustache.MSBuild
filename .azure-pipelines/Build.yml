@@ -179,6 +179,17 @@ jobs:
         }]
     condition: and(succeeded(), eq(variables['IsSigned'], 'True'))
 
+  - task: DotNetCoreCLI@2
+    displayName: 'DotNet Publish'
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: dirs.proj
+      arguments: '--no-build -c $(BuildConfiguration) -p:PublishBaseDir=$(PublishFolder)'
+      zipAfterPublish: false
+      modifyOutputPath: false
+    condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
+
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Packages'
     inputs:
