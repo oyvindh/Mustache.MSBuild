@@ -198,6 +198,13 @@ jobs:
     condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
 
   - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Publish'
+    inputs:
+      PathtoPublish: '$(PublishFolder)'
+      ArtifactName: publish
+    condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
+
+  - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: RoslynOutput'
     inputs:
       PathtoPublish: '$(AnalyzersLogDirectory)'
