@@ -37,21 +37,12 @@ jobs:
       secureFile: '$(SecureFileId)'
     condition: and(succeeded(), eq(variables['IsSigned'], 'True'))
 
-  - task: UseDotNet@2
-    displayName: 'Use .NET Core sdk'
+  - task: NodeTool@0
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@3
+    displayName: 'Run CredScan'
     inputs:
-      packageType: sdk
-      version: 5.0.301
-      installationPath: $(Agent.ToolsDirectory)/dotnet
-    condition: and(succeeded(), eq(variables['IsSigned'], 'True'))
-
-  - task: UseDotNet@2
-    displayName: 'Use .NET Core sdk'
-    inputs:
-      packageType: sdk
-      version: 2.2.207
-      installationPath: $(Agent.ToolsDirectory)/dotnet
-    condition: and(succeeded(), eq(variables['IsSigned'], 'True'))
+      suppressionsFile: '.config/CredScanSuppressions.json'
+      debugMode: false
 
   - task: DotNetCoreCLI@2
     displayName: 'DotNet Restore'
