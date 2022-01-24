@@ -37,13 +37,6 @@ jobs:
       secureFile: '$(SecureFileId)'
     condition: and(succeeded(), eq(variables['IsSigned'], 'True'))
 
-  - task: NodeTool@0
-  - task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@3
-    displayName: 'Run CredScan'
-    inputs:
-      suppressionsFile: '.config/CredScanSuppressions.json'
-      debugMode: false
-
   - task: DotNetCoreCLI@2
     displayName: 'DotNet Restore'
     inputs:
