@@ -211,15 +211,17 @@ jobs:
 
 - job: codeAnalysisLogsJob
   dependsOn: mainJob
-  container: mcr.microsoft.com/dotnet/sdk:5.0
-  condition: and(succeeded(), eq(variables['UseHera'], 'True'))
+  pool:
+    name: 1es-people-platform
   displayName: "Code analysis log handling (extra tasks for Hera)"
+  condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
   steps:
   - task: DownloadPipelineArtifact@2
     displayName: 'Download Pipeline Artifact RoslynOutput'
     inputs:
       artifactName: RoslynOutput
       targetPath: '$(Pipeline.Workspace)\RoslynOutput'
+    condition: and(succeeded(), eq(variables['Hera'], 'True'))
 
   - task: NodeTool@0
 
@@ -230,11 +232,18 @@ jobs:
       version: 3.1.201
       installationPath: $(Agent.ToolsDirectory)/dotnet
 
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@3
+    displayName: 'Run CredScan'
+    inputs:
+      suppressionsFile: '.config/CredScanSuppressions.json'
+      debugMode: false
+
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-roslynanalyzers.RoslynAnalyzers@3
     displayName: 'Run Roslyn Analyzers in copy logs mode'
     inputs:
       copyLogsOnly: true
       logRootDirectory: '$(Pipeline.Workspace)\RoslynOutput'
+    condition: and(succeeded(), eq(variables['Hera'], 'True'))
 
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-publishsecurityanalysislogs.PublishSecurityAnalysisLogs@3
     displayName: 'Re-Publish Security Analysis Logs'
@@ -243,6 +252,7 @@ jobs:
       ArtifactType: 'M365'
       AllTools: true
       ToolLogsNotFoundAction: 'Standard'
+    condition: and(succeeded(), eq(variables['Hera'], 'True'))
 
   - task: dikalya.AssetRetention.asset-retention-task.AssetRetention@3
     displayName: 'ARtifact Retention Orchestrator Workflow (ARROW)'
@@ -252,3 +262,4 @@ jobs:
       DropsToRetain: CodeAnalysisLogs
     env:
       SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+    condition: and(succeeded(), eq(variables['Hera'], 'True'))
