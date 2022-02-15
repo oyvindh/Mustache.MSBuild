@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Update="@(ProjectReference)" OutputItemType="BuildOutputs" Targets="InspectBuildOutputs" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="@(ProjectReference)" OutputItemType="BuildOutputs" Targets="InspectBuildOutputs" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <Target Name="SetVsoBuildNumber" DependsOnTargets="GetBuildVersion" BeforeTargets="Build">
@@ -15,6 +15,7 @@
   <Target Name="SetSignStagingDir">
     <PropertyGroup>
       <DelaySignStagingFolder Condition="'$(DelaySignStagingFolder)' == ''">$(IntermediateOutputPath)DelaySignStaging\</DelaySignStagingFolder>
+      <DelaySignStagingFolder Condition="!HasTrailingSlash('$(DelaySignStagingFolder)')">$(DelaySignStagingFolder)\</DelaySignStagingFolder>
       <DelaySignedLinkOutputPath Condition="'$(DelaySignedLinkOutputPath)' == ''">$(DelaySignStagingFolder)Links\</DelaySignedLinkOutputPath>
       <DelaySignedOutputPath Condition="'$(DelaySignedOutputPath)' == ''">$(DelaySignStagingFolder)Files\</DelaySignedOutputPath>
       <DelaySignStagingFolder Condition="'$(DelaySignStagingFolder)' != '' and !HasTrailingSlash('$(DelaySignStagingFolder)')">$(DelaySignStagingFolder)\</DelaySignStagingFolder>
@@ -69,26 +70,6 @@
       UseSymboliclinksIfPossible="$(CreateSymbolicLinksForPublishFilesIfPossible)" />
   </Target>
 
-  <Target Name="CopySignedFiles">
-    <ItemGroup>
-      <DelaySignedLinks Include="$(DelaySignedLinkOutputPath)*.original" />
-    </ItemGroup>
-
-    <ReadLinesFromFile File="%(DelaySignedLinks.Identity)">
-      <Output TaskParameter="Lines" ItemName="DelaySignedFiles" />
-    </ReadLinesFromFile>
-
-    <Copy
-      SourceFiles="@(DelaySignedFiles)"
-      DestinationFolder="$(DelaySignedOutputPath)"
-      SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
-      OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
-      Retries="$(CopyRetryCount)"
-      RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
-      UseHardlinksIfPossible="$(CreateHardLinksForPublishFilesIfPossible)"
-      UseSymboliclinksIfPossible="$(CreateSymbolicLinksForPublishFilesIfPossible)" />
-  </Target>
-
   <Target Name="CopySignedFiles" DependsOnTargets="SetSignStagingDir">
     <ItemGroup>
       <SignStagedFiles Include="$(DelaySignedOutputPath)*" />
@@ -113,7 +94,7 @@
 
     <Copy
       SourceFiles="@(SignFileTargets->'$(SignedFile)')"
-      DestinationFiles="%(FullPath)"
+      DestinationFiles="@(SignFileTargets->'%(FullPath)')"
       SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
       OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
       Retries="$(CopyRetryCount)"

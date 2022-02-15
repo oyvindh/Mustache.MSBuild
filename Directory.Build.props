@@ -3,6 +3,7 @@
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
 
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <!-- Prevent NerdBank from loading in mono (which omnisharp uses on linux) /-->
     <GenerateAssemblyVersionInfo Condition="'$(MSBuildRuntimeType)'=='Mono'">false</GenerateAssemblyVersionInfo>
   </PropertyGroup>
@@ -28,8 +29,8 @@
   </PropertyGroup>
 
   <PropertyGroup Label="Roslyn Analyzers">
-    <!-- Roslyn analyzers settings -->
-    <CodeAnalysisRuleset>$(MSBuildThisFileDirectory)\.config\CodeAnalysis.ruleset</CodeAnalysisRuleset>
+    <!-- Modern FxCop replacement with strictest settings: https://docs.microsoft.com/en-us/visualstudio/code-quality/migrate-from-legacy-analysis-to-net-analyzers -->
+    <AnalysisMode>All</AnalysisMode>
 
     <!-- StyleCop settings -->
     <!-- This property is disabled by default in Directory.Build.props because StyleCop is not a SDL requirement. -->
@@ -37,14 +38,19 @@
     <StyleCopTreatErrorsAsWarnings>false</StyleCopTreatErrorsAsWarnings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Include="System.CLSCompliantAttribute">
+      <_Parameter1>false</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
   <ItemGroup Label="Dockerfile Publish Convention">
     <None Include="Dockerfile" CopyToOutputDirectory="PreserveNewest" Condition="Exists('Dockerfile')" />
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="Nerdbank.GitVersioning" Version="3.3.37" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.3.0" PrivateAssets="All"/>
-    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="16.8.55">
+    <PackageReference Include="Nerdbank.GitVersioning" Version="3.4.255" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.0.64">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>

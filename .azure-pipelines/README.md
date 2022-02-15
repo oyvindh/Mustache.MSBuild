@@ -1,6 +1,6 @@
 # Introduction
 
-This baseline tries to be as generic for .NET Core builds as possible and thus also platform indepenent, so it can run on any agent with small changes. It is tailored to run in a containerized Linux build as that offers the most flexibility, but sometimes there is a need to change it slightly so that legacy modules can be built on a windows machine.
+This baseline tries to be as generic for .NET Core builds as possible and thus also platform independent, so it can run on any agent with small changes. It is tailored to run in a containerized Linux build as that offers the most flexibility, but sometimes there is a need to change it slightly so that legacy modules can be built on a windows machine.
 
 The `Build.yml` file describes the build definition.
 The `Vso.Adapter.targets` file is the integration layer for MSBuild when running in the Azure DevOps build environment.

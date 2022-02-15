@@ -5,30 +5,31 @@ variables:
   - name: PublicRelease
     value: "$[ eq(variables['Build.SourceBranch'], 'refs/heads/main') ]"
   - name: IsSigned
-    value: "$[ and(eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['Sign'], 'True')) ]"
+    value: "$[ and(eq(variables['PublicRelease'], 'True'), eq(variables['Sign'], 'True')) ]"
   - name: UseHera
-    value: "$[ and(eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['Hera'], 'True')) ]"
-  - name: PackageFolder
-    value: '$(Build.ArtifactStagingDirectory)/packages'
-  - name: PublishFolder
-    value: '$(Build.ArtifactStagingDirectory)/publish'
-  - name: DelaySignedOutputPath
-    value: '$(Build.ArtifactStagingDirectory)/assemblies'
-  - name: DelaySignedLinkOutputPath
-    value: '$(Build.ArtifactStagingDirectory)/links'
-  - name: AnalyzersLogDirectory
-    value: '$(Agent.BuildDirectory)/_sdt/logs/CodeAnalysisLogs'
-  - name: BuildConfiguration
-    value: 'Release'
-  - name: AssemblyOriginatorKeyFile
-    value: '$(AssemblyOriginatorKeyFile.secureFilePath)'
-  - name: NUGET_PACKAGES
-    value: '$(Pipeline.Workspace)/.nuget/packages'
+    value: "$[ and(eq(variables['PublicRelease'], 'True'), eq(variables['Hera'], 'True')) ]"
 
 jobs:
 - job: mainJob
   displayName: "Build, Sign and Test"
-  container: mcr.microsoft.com/dotnet/sdk:5.0
+  container: mcr.microsoft.com/dotnet/sdk:6.0
+  variables:
+    - name: PackageFolder
+      value: '$(Build.ArtifactStagingDirectory)/packages'
+    - name: PublishFolder
+      value: '$(Build.ArtifactStagingDirectory)/publish'
+    - name: DelaySignedOutputPath
+      value: '$(Build.ArtifactStagingDirectory)/assemblies'
+    - name: DelaySignedLinkOutputPath
+      value: '$(Build.ArtifactStagingDirectory)/links'
+    - name: AnalyzersLogDirectory
+      value: '$(Agent.BuildDirectory)/_sdt/logs/CodeAnalysisLogs'
+    - name: BuildConfiguration
+      value: 'Release'
+    - name: AssemblyOriginatorKeyFile
+      value: '$(AssemblyOriginatorKeyFile.secureFilePath)'
+    - name: NUGET_PACKAGES
+      value: '$(Pipeline.Workspace)/.nuget/packages'
   steps:
   - task: DownloadSecureFile@1
     name: "AssemblyOriginatorKeyFile"
@@ -51,9 +52,9 @@ jobs:
     inputs:
       command: build
       projects: dirs.proj
-      arguments: '--configuration $(BuildConfiguration) -p:CreateSymbolicLinksForCopyLocalIfPossible=$(PublicRelease) --no-restore -warnaserror -v n'
+      arguments: '--configuration $(BuildConfiguration) --no-restore -warnaserror -v n'
 
-  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+  - task: EsrpCodeSigning@1
     displayName: 'ESRP CodeSigning dlls'
     inputs:
       ConnectedServiceName: '$(EsrpEndpointName)'
@@ -118,8 +119,8 @@ jobs:
       command: 'custom'
       projects: 'dirs.proj'
       custom: 'msbuild'
-      arguments: '-target:CopySignedFiles'
-    condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
+      arguments: '-target:CopySignedFiles -warnaserror'
+    condition: and(succeeded(), eq(variables['IsSigned'], 'True'))
 
   - task: DotNetCoreCLI@2
     displayName: 'DotNet Test'
@@ -139,7 +140,7 @@ jobs:
       verbosityPack: Normal
     condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
 
-  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+  - task: EsrpCodeSigning@1
     displayName: 'ESRP CodeSigning Packages'
     inputs:
       ConnectedServiceName: '$(EsrpEndpointName)'
@@ -238,7 +239,7 @@ jobs:
       logRootDirectory: '$(Pipeline.Workspace)\RoslynOutput'
     condition: and(succeeded(), eq(variables['Hera'], 'True'))
 
-  - task: securedevelopmentteam.vss-secure-development-tools.build-task-publishsecurityanalysislogs.PublishSecurityAnalysisLogs@3
+  - task: PublishSecurityAnalysisLogs@3
     displayName: 'Re-Publish Security Analysis Logs'
     inputs:
       ArtifactName: 'CodeAnalysisLogs'
@@ -247,7 +248,7 @@ jobs:
       ToolLogsNotFoundAction: 'Standard'
     condition: and(succeeded(), eq(variables['Hera'], 'True'))
 
-  - task: dikalya.AssetRetention.asset-retention-task.AssetRetention@3
+  - task: AssetRetention@3
     displayName: 'ARtifact Retention Orchestrator Workflow (ARROW)'
     inputs:
       ArrowServiceConnection: '$(ArrowEndpointName)'

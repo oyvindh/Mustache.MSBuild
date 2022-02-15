@@ -4,7 +4,7 @@
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
 
-  <PropertyGroup Label="Signing" Condition="'$(IsSigned)'=='true' AND '$(IsTestProject)'!='true'">
+  <PropertyGroup Label="Signing" Condition="'$(IsSigned)'=='true' AND '$(IsTestProject)'!='true' AND '$(ExcludeFromSigning)'!='true'">
     <SignAssembly>true</SignAssembly>
     <DelaySign>true</DelaySign>
   </PropertyGroup>
@@ -17,12 +17,17 @@
 
   <!-- Returns an overview of build generated outputs -->
   <Target Name="InspectBuildOutputs" Returns="@(BuildOutputs)">
-    <Message Importance="high" Text="Inspecting build outputs for $(TargetPath)" />
     <ItemGroup>
-      <BuildOutputs Include="$(TargetPath)">
+      <BuildOutputs Include="@(IntermediateAssembly->'%(FullPath)')">
         <IsCopiedReference>false</IsCopiedReference>
         <IsDelaySigned>false</IsDelaySigned>
         <IsDelaySigned Condition="'$(DelaySign)'=='true'">true</IsDelaySigned>
+        <FullFileName>%(FileName)%(Extension)</FullFileName>
+      </BuildOutputs>
+
+      <BuildOutputs Include="$(TargetPath)">
+        <IsCopiedReference>true</IsCopiedReference>
+        <IsDelaySigned>false</IsDelaySigned>
         <FullFileName>$(TargetFileName)</FullFileName>
       </BuildOutputs>
       
