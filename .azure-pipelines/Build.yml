@@ -207,7 +207,7 @@ jobs:
   dependsOn: mainJob
   pool:
     name: 1es-people-platform
-  displayName: "Code analysis log handling (extra tasks for Hera)"
+  displayName: "Code analysis log handling"
   condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
   steps:
   - task: DownloadPipelineArtifact@2
@@ -215,7 +215,7 @@ jobs:
     inputs:
       artifactName: RoslynOutput
       targetPath: '$(Pipeline.Workspace)\RoslynOutput'
-    condition: and(succeeded(), eq(variables['Hera'], 'True'))
+    condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
 
   - task: NodeTool@0
 
@@ -237,7 +237,7 @@ jobs:
     inputs:
       copyLogsOnly: true
       logRootDirectory: '$(Pipeline.Workspace)\RoslynOutput'
-    condition: and(succeeded(), eq(variables['Hera'], 'True'))
+    condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
 
   - task: PublishSecurityAnalysisLogs@3
     displayName: 'Re-Publish Security Analysis Logs'
@@ -246,7 +246,7 @@ jobs:
       ArtifactType: 'M365'
       AllTools: true
       ToolLogsNotFoundAction: 'Standard'
-    condition: and(succeeded(), eq(variables['Hera'], 'True'))
+    condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
 
   - task: AssetRetention@3
     displayName: 'ARtifact Retention Orchestrator Workflow (ARROW)'
@@ -256,4 +256,4 @@ jobs:
       DropsToRetain: CodeAnalysisLogs
     env:
       SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-    condition: and(succeeded(), eq(variables['Hera'], 'True'))
+    condition: and(succeeded(), eq(variables['PublicRelease'], 'True'))
