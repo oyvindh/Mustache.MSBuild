@@ -1,0 +1,5 @@
+/MaxCPUCount
+/NodeReuse:false
+/IgnoreProjectExtensions:.sln
+/Property:NuGetInteractive=True
+/Property:GenerateFullPaths=true

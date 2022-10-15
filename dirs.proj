@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.Build.Traversal">
+  <ItemGroup Label="Traversal">
+    <ProjectReference Include="src\**\*.*proj" Condition="Exists('src\')" />
+  </ItemGroup>
+
+  <Import Project=".azure-pipelines\Vso.Adapter.targets" Condition="'$(PublicRelease)' == 'true'" />
+</Project>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- Prevent NerdBank from loading in mono (which omnisharp uses on linux) /-->
+    <GenerateAssemblyVersionInfo Condition="'$(MSBuildRuntimeType)'=='Mono'">false</GenerateAssemblyVersionInfo>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Assembly Info">
+    <Company>Microsoft Corporation</Company>
+    <Copyright>Copyright © $([System.DateTime]::Now.ToString(yyyy)) Microsoft Corporation. All rights reserved.</Copyright>
+    <Product Condition="'$(PublicRelease)'!='true'">Microsoft ® - Private (Built by $(USERNAME) on $(COMPUTERNAME)).</Product>
+    <Product Condition="'$(PublicRelease)'=='true'">Microsoft ® $(MSBuildProjectName)</Product>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Publish Customizations">
+    <!-- Publish should be opt-in per project -->
+    <IsPublishable>false</IsPublishable>
+
+    <!-- Support publishing multiple projects to a common parent directory -->
+    <PublishDir Condition="'$(PublishBaseDir)'!=''">$(PublishBaseDir)\$(MSBuildProjectName)</PublishDir>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Package Locking">
+    <RestorePackagesWithLockFile>false</RestorePackagesWithLockFile>
+    <RestoreLockedMode>$(PublicRelease)</RestoreLockedMode>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Roslyn Analyzers">
+    <!-- Modern FxCop replacement with strictest settings: https://docs.microsoft.com/en-us/visualstudio/code-quality/migrate-from-legacy-analysis-to-net-analyzers -->
+    <AnalysisMode>All</AnalysisMode>
+
+    <!-- StyleCop settings -->
+    <!-- This property is disabled by default in Directory.Build.props because StyleCop is not a SDL requirement. -->
+    <StyleCopEnabled Condition="'$(StyleCopEnabled)'==''">true</StyleCopEnabled>
+    <StyleCopTreatErrorsAsWarnings>false</StyleCopTreatErrorsAsWarnings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.CLSCompliantAttribute">
+      <_Parameter1>false</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup Label="Dockerfile Publish Convention">
+    <None Include="Dockerfile" CopyToOutputDirectory="PreserveNewest" Condition="Exists('Dockerfile')" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Nerdbank.GitVersioning" Version="3.4.255" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.0.64">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" PrivateAssets="All" Condition="'$(StyleCopEnabled)'=='true'" />
+  </ItemGroup>
+</Project>

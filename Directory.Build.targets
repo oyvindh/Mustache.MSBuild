@@ -1,0 +1,60 @@
+
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Signing" Condition="'$(IsSigned)'=='true' AND '$(IsTestProject)'!='true' AND '$(ExcludeFromSigning)'!='true'">
+    <SignAssembly>true</SignAssembly>
+    <DelaySign>true</DelaySign>
+  </PropertyGroup>
+  
+  <PropertyGroup Label="Analyzers Log Output">
+    <AnalyzersLogDirectory Condition="'$(AnalyzersLogDirectory)'==''">$(IntermediateOutputPath)\CodeAnalysisLogs\</AnalyzersLogDirectory>
+    <ErrorLog>$(AnalyzersLogDirectory)\$(MSBuildProjectName).sarif</ErrorLog>
+    <AnalyzersLog>$(AnalyzersLogDirectory)\$(MSBuildProjectName).analyzers</AnalyzersLog>
+  </PropertyGroup>
+
+  <!-- Returns an overview of build generated outputs -->
+  <Target Name="InspectBuildOutputs" Returns="@(BuildOutputs)">
+    <ItemGroup>
+      <BuildOutputs Include="@(IntermediateAssembly->'%(FullPath)')">
+        <IsCopiedReference>false</IsCopiedReference>
+        <IsDelaySigned>false</IsDelaySigned>
+        <IsDelaySigned Condition="'$(DelaySign)'=='true'">true</IsDelaySigned>
+        <FullFileName>%(FileName)%(Extension)</FullFileName>
+      </BuildOutputs>
+
+      <BuildOutputs Include="$(TargetPath)">
+        <IsCopiedReference>true</IsCopiedReference>
+        <IsDelaySigned>false</IsDelaySigned>
+        <FullFileName>$(TargetFileName)</FullFileName>
+      </BuildOutputs>
+      
+      <BuildOutputs Include="@(ReferencesCopiedInThisBuild->'%(FullPath)')">
+        <IsCopiedReference>true</IsCopiedReference>
+        <IsDelaySigned>false</IsDelaySigned>
+        <FullFileName>%(FileName)%(Extension)</FullFileName>
+      </BuildOutputs>
+    </ItemGroup>
+  </Target>
+  
+  <Target Name="CreateDirectories" BeforeTargets="CoreCompile">
+    <MakeDir Directories="$(AnalyzersLogDirectory)"/>  
+  </Target>
+
+  <!-- In addition to the sarif output, also log the referenced analyzer dlls and the ruleset file path -->
+  <Target Name="LogStaticAnalysisConfig" AfterTargets="CoreCompile">
+    <ItemGroup>
+      <Lines Include="Using ruleset file: $(ResolvedCodeAnalysisRuleSet)" />
+      <Lines Include="Using analyzer assemblies:" />
+      <Lines Include="@(Analyzer->'  %(fullpath)')" />
+    </ItemGroup>
+
+    <WriteLinesToFile
+        File="$(AnalyzersLog)"
+        Lines="@(Lines)"
+        Overwrite="true"
+        Encoding="Unicode" />
+  </Target>
+</Project>

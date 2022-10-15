@@ -1,0 +1,31 @@
+root = true
+
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.csproj]
+indent_size = 2
+
+[*.json]
+indent_size = 2
+
+[*.yml]
+indent_size = 2
+
+[*.cs]
+# Uninstantiated internal classes. Causes false positives with minimal api style files
+dotnet_diagnostic.CA1812.severity = none
+# Using inside of namespace
+dotnet_diagnostic.SA1200.severity = none
+# File headers
+dotnet_diagnostic.SA1633.severity = none
+# Constructor summary starting with standard text
+dotnet_diagnostic.SA1642.severity = none
+# StyleCop wants both public and internal elements to be documented, and CS1591 checks only public, so supressing this will ignore xml docs for internal elements
+dotnet_diagnostic.SA1600.severity = none
+# SA1623: Property summary documentation should match accessors
+dotnet_diagnostic.SA1623.severity = none

@@ -1,0 +1,13 @@
+// See https://aka.ms/vscode-remote/containers for the
+// documentation about the devcontainer.json format
+{
+    "name": "dotnet container",
+    "dockerComposeFile": [
+        "docker-compose.yml"
+    ],
+    "service": "dev",
+    "workspaceFolder": "/workspace",
+    "extensions": [
+        "ms-vscode.csharp"
+    ]
+}
