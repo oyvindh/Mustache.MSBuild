@@ -19,6 +19,7 @@ indent_size = 2
 [*.cs]
 # Uninstantiated internal classes. Causes false positives with minimal api style files
 dotnet_diagnostic.CA1812.severity = none
+dotnet_diagnostic.CS1591.severity = none
 # Using inside of namespace
 dotnet_diagnostic.SA1200.severity = none
 # File headers

@@ -1,0 +1,7 @@
+<Project TreatAsLocalProperty="TasksAssembly">
+  <PropertyGroup>
+    <TasksAssembly>$(MSBuildThisFileDirectory)\..\lib\netstandard2.0\Mustache.MSBuild.dll</TasksAssembly>
+  </PropertyGroup>
+
+  <UsingTask TaskName="Mustache" AssemblyFile="$(TasksAssembly)" />
+</Project>

@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Mustache.MSBuild\Mustache.MSBuild.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="Mustache.NETStandard" Version="1.1.0" />
+    <PackageReference Include="System.Text.Json" Version="6.0.6" />
+    <PackageReference Include="Microsoft.Build.Framework" Version="17.0.0" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="data/*.*" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="mustache-templates/*.mustache" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="directory-structure.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

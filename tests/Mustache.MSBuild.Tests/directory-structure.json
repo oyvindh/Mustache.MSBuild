@@ -1,0 +1,15 @@
+{
+  "Children": [
+    {
+      "Name": "FirstOnLevel1"
+    },
+    {
+      "Name": "SecondOnLevel1",
+      "Children": [
+        {
+            "Name": "FirstUnderSecondLevel2"
+        }
+      ]
+    }
+  ]
+}
