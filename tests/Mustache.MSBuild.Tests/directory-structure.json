@@ -1,13 +1,13 @@
 {
   "Children": [
     {
-      "Name": "FirstOnLevel1"
+      "Name": "1.1"
     },
     {
-      "Name": "SecondOnLevel1",
+      "Name": "2.1",
       "Children": [
         {
-            "Name": "FirstUnderSecondLevel2"
+            "Name": "2.1.2"
         }
       ]
     }

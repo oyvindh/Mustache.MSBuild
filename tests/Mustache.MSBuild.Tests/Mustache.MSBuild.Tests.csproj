@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="data/*.*" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="data/**/*.*" CopyToOutputDirectory="PreserveNewest" />
     <None Include="mustache-templates/*.mustache" CopyToOutputDirectory="PreserveNewest" />
     <None Include="directory-structure.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>

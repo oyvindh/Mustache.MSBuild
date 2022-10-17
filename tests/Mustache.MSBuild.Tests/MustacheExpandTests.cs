@@ -20,7 +20,7 @@ public class MustacheExpandTests
     }
 
     [Fact]
-    public void Execute_ValidJsonWithNoSchema_Success()
+    public void Execute_SimpleTemplate_Success()
     {
         var task = new MustacheExpand
         {
