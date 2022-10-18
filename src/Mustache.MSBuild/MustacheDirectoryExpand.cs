@@ -53,7 +53,7 @@ public class MustacheDirectoryExpand : Microsoft.Build.Utilities.Task
         // The content of the data file is added along with the data from the directories above and passed to the template.
         // The directory names will be accessible using {{DirectoryNameOfLevelN}}, where N is the depth in the directory tree.
         var nodes = directoryTree?.Children.SelectMany(item => Traverse(item, directory => directory.Children, node => this.ExpandTemplate(node)));
-        Console.WriteLine(nodes.Count());
+        var count = nodes?.Count() ?? 0;
         return true;
     }
 
@@ -114,7 +114,7 @@ public class MustacheDirectoryExpand : Microsoft.Build.Utilities.Task
             return true;
         }
 
-        File.WriteAllText(Path.Combine(outputDirectory, this.DefaultDestinationFileName), renderedTemplate);
+        File.WriteAllText(Path.Combine(outputDirectory, this.DefaultDestinationFileName), renderedTemplate?.TrimEnd());
         return true;
     }
 }
