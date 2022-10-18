@@ -6,4 +6,3 @@
   <UsingTask TaskName="MustacheExpand" AssemblyFile="$(MustacheTasksAssembly)" />
   <UsingTask TaskName="MustacheDirectoryExpand" AssemblyFile="$(MustacheTasksAssembly)" />
 </Project>
-MustacheDirectoryExpand
