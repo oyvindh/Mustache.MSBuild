@@ -4,5 +4,5 @@
     <ProjectReference Include="tests\**\*.*proj" Condition="Exists('tests\')" />
   </ItemGroup>
 
-  <Import Project=".azure-pipelines\Vso.Adapter.targets" Condition="'$(PublicRelease)' == 'true'" />
+  <Import Project=".github\Adapter.targets" Condition="'$(PublicRelease)' == 'true'" />
 </Project>
