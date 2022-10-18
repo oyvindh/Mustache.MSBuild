@@ -1,5 +1,6 @@
 namespace Mustache.MSBuild;
 
+using Microsoft.Build.Framework;
 using Mustache;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -95,11 +96,11 @@ public class MustacheDirectoryExpand : Microsoft.Build.Utilities.Task
         }
         else
         {
-            Console.WriteLine($"Data file {dataFile} was not located. Will use parent data.");
+            this.Log.LogMessage(MessageImportance.Normal, $"Data file {dataFile} was not located. Will use parent data.");
         }
 
         var outputDirectory = Path.Combine(this.DestinationRootDirectory, node.GetIdentifierChain());
-        Console.WriteLine($"Resulting directory is {outputDirectory}");
+        this.Log.LogMessage(MessageImportance.Normal, $"Resulting directory is {outputDirectory}");
 
         node.ResolvedData = mergedData.ToDictionary(kv => kv.Key, kv => kv.Value);
         node.ResolvedData.Add($"DirectoryNameOfLevel{node.Level}", node.Item.Id);

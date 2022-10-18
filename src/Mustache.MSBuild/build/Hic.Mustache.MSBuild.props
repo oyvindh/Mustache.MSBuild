@@ -3,5 +3,6 @@
     <TasksAssembly>$(MSBuildThisFileDirectory)\..\lib\netstandard2.0\Mustache.MSBuild.dll</TasksAssembly>
   </PropertyGroup>
 
-  <UsingTask TaskName="Mustache" AssemblyFile="$(TasksAssembly)" />
+  <UsingTask TaskName="MustacheExpand" AssemblyFile="$(TasksAssembly)" />
+  <UsingTask TaskName="MustacheDirectoryExpand" AssemblyFile="$(TasksAssembly)" />
 </Project>
