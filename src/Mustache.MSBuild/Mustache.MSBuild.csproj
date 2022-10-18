@@ -14,9 +14,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" PrivateAssets="All" />
-    <PackageReference Include="Mustache.NETStandard" Version="1.1.0" PrivateAssets="All" />
-    <PackageReference Include="System.Text.Json" Version="6.0.6" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" PrivateAssets="All" Pack="true" />
+    <PackageReference Include="Mustache.NETStandard" Version="1.1.0" PrivateAssets="All" Pack="true" />
+    <PackageReference Include="System.Text.Json" Version="6.0.6" PrivateAssets="All" Pack="true" />
     <PackageReference Include="Microsoft.Build.Framework" Version="17.0.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.0.0" PrivateAssets="All" />
   </ItemGroup>
