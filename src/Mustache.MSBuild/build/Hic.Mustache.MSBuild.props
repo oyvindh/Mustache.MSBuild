@@ -1,8 +1,9 @@
 <Project TreatAsLocalProperty="TasksAssembly">
   <PropertyGroup>
-    <TasksAssembly>$(MSBuildThisFileDirectory)\..\lib\netstandard2.0\Mustache.MSBuild.dll</TasksAssembly>
+    <MustacheTasksAssembly>$(MSBuildThisFileDirectory)\..\lib\netstandard2.0\Mustache.MSBuild.dll</MustacheTasksAssembly>
   </PropertyGroup>
 
-  <UsingTask TaskName="MustacheExpand" AssemblyFile="$(TasksAssembly)" />
-  <UsingTask TaskName="MustacheDirectoryExpand" AssemblyFile="$(TasksAssembly)" />
+  <UsingTask TaskName="MustacheExpand" AssemblyFile="$(MustacheTasksAssembly)" />
+  <UsingTask TaskName="MustacheDirectoryExpand" AssemblyFile="$(MustacheTasksAssembly)" />
 </Project>
+MustacheDirectoryExpand
