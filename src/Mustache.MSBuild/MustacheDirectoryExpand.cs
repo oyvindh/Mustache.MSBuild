@@ -107,7 +107,11 @@ public class MustacheDirectoryExpand : Microsoft.Build.Utilities.Task
 
         var renderedTemplate = this.template?.Render(node.ResolvedData);
 
-        System.IO.Directory.CreateDirectory(outputDirectory.Trim());
+        System.IO.Directory.CreateDirectory(
+            outputDirectory
+                .Replace('/', Path.DirectorySeparatorChar)
+                .Replace('\\', Path.DirectorySeparatorChar)
+                .Trim());
 
         if (this.LeafExpansion && node.Item.Children.Any())
         {
