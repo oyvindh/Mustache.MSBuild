@@ -100,14 +100,14 @@ public class MustacheDirectoryExpand : Microsoft.Build.Utilities.Task
         }
 
         var outputDirectory = Path.Combine(this.DestinationRootDirectory, node.GetIdentifierChain());
-        this.Log.LogMessage(MessageImportance.Normal, $"Resulting directory is {outputDirectory}");
+        this.Log.LogMessage(MessageImportance.Normal, $"Resulting directory is '{outputDirectory}'");
 
         node.ResolvedData = mergedData.ToDictionary(kv => kv.Key, kv => kv.Value);
         node.ResolvedData.Add($"DirectoryNameOfLevel{node.Level}", node.Item.Id);
 
         var renderedTemplate = this.template?.Render(node.ResolvedData);
 
-        System.IO.Directory.CreateDirectory(outputDirectory);
+        System.IO.Directory.CreateDirectory(outputDirectory.Trim());
 
         if (this.LeafExpansion && node.Item.Children.Any())
         {
