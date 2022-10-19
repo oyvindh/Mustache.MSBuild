@@ -29,6 +29,8 @@ public class MustacheDirectoryExpand : Microsoft.Build.Utilities.Task
 
     public override bool Execute()
     {
+        this.NormalizePaths();
+
         // Parse and compile the template.
         var templateString = File.ReadAllText(this.TemplateFile);
         this.template = Template.Compile(templateString);
@@ -107,11 +109,7 @@ public class MustacheDirectoryExpand : Microsoft.Build.Utilities.Task
 
         var renderedTemplate = this.template?.Render(node.ResolvedData);
 
-        System.IO.Directory.CreateDirectory(
-            outputDirectory
-                .Replace('/', Path.DirectorySeparatorChar)
-                .Replace('\\', Path.DirectorySeparatorChar)
-                .Trim());
+        System.IO.Directory.CreateDirectory(outputDirectory);
 
         if (this.LeafExpansion && node.Item.Children.Any())
         {
@@ -120,6 +118,19 @@ public class MustacheDirectoryExpand : Microsoft.Build.Utilities.Task
 
         File.WriteAllText(Path.Combine(outputDirectory, this.DefaultDestinationFileName), renderedTemplate?.TrimEnd());
         return true;
+    }
+
+    private void NormalizePaths()
+    {
+        this.DestinationRootDirectory = this.DestinationRootDirectory
+            .Replace('/', Path.DirectorySeparatorChar)
+            .Replace('\\', Path.DirectorySeparatorChar)
+            .Trim();
+
+        this.DataRootDirectory = this.DataRootDirectory
+            .Replace('/', Path.DirectorySeparatorChar)
+            .Replace('\\', Path.DirectorySeparatorChar)
+            .Trim();
     }
 }
 
