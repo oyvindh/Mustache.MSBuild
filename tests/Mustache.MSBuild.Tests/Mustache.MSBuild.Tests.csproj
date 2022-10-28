@@ -15,6 +15,6 @@
   <ItemGroup>
     <None Include="data/**/*.*" CopyToOutputDirectory="PreserveNewest" />
     <None Include="mustache-templates/*.mustache" CopyToOutputDirectory="PreserveNewest" />
-    <None Include="directory-structure.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="data-directory-structure.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

@@ -30,7 +30,7 @@ public class MustacheDirectoryExpandTests
         Assert.True(result);
 
         var directoryStructure = JsonSerializer.Deserialize<Directory>(
-            File.ReadAllText("directory-structure.json"),
+            File.ReadAllText("data-directory-structure.json"),
             new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,
@@ -57,7 +57,7 @@ public class MustacheDirectoryExpandTests
         Assert.True(result);
 
         var directoryStructure = JsonSerializer.Deserialize<Directory>(
-            File.ReadAllText("directory-structure.json"),
+            File.ReadAllText("data-directory-structure.json"),
             new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,
