@@ -21,7 +21,7 @@ public class MustacheDirectoryExpand : Microsoft.Build.Utilities.Task
 
     public string DataRootDirectory { get; set; } = "data";
 
-    public string DirectoryStructureFile { get; set; } = "directory-structure.json";
+    public string DirectoryStructureFile { get; set; } = "data-directory-structure.json";
 
     public string DefaultDataFileName { get; set; } = "data.json";
 
