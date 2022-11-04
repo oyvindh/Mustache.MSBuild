@@ -142,6 +142,11 @@ public class MustacheDirectoryExpand : Microsoft.Build.Utilities.Task
                 continue;
             }
 
+            if (this.rootData == null)
+            {
+                this.rootData = new Dictionary<string, object>();
+            }
+
             this.rootData.Add(keyValue[0], keyValue[1]);
         }
     }
