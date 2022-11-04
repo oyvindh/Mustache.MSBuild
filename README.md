@@ -9,11 +9,49 @@ This repository contains the code for MSBuild tasks that allow the expansion of 
 
 There are two main ways to run this. The most simple, is to use the `MustacheExpand` task. This takes a template and a data file as input and produce the expanded result in a file. The other way, `MustacheDirectoryExpand`, is to expand a directory structure where data can be overridden at every level. This mode becomes very useful is you are expanding configuration that does not support parameterization.
 
+## MustacheExpand task
+
 ```xml
-<MustcheExpand
-    TemplateFile="mustache-tempates/simple.mustache"
+<MustacheExpand
+    TemplateFile="mustache-templates/simple.mustache"
     DataFile="simple.json" />
 ```
+
+## MustacheDirectoryExpand task
+
+To use the directory expansion, you need to declare the directory input and output structure that you want.
+
+```json
+{
+  "Children": [
+    {
+      "Name": "First"
+    },
+    {
+      "Name": "Second",
+      "Children": [
+        {
+            "Name": "FirstChild"
+        }
+      ]
+    }
+  ]
+}
+```
+
+Then you can define parameters/data to the template expansion that override values downward in the tree structure
+
+```txt
+data
+├── First
+│   └── data.json
+├── Second
+│   └── FirstChild
+│       └── data.json
+└── data.json
+```
+
+Now, you can declare the task and do a directory wise template expansion.
 
 ```xml
 <MustacheDirectoryExpand

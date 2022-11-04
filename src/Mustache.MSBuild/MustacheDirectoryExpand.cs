@@ -27,6 +27,8 @@ public class MustacheDirectoryExpand : Microsoft.Build.Utilities.Task
 
     public bool LeafExpansion { get; set; } = true;
 
+    public string InputData { get; set; } = string.Empty;
+
     public override bool Execute()
     {
         this.NormalizePaths();
@@ -50,6 +52,9 @@ public class MustacheDirectoryExpand : Microsoft.Build.Utilities.Task
 
         using var dataStream = File.OpenRead(rootDataFile);
         this.rootData = JsonSerializer.Deserialize<Dictionary<string, object>>(dataStream);
+
+        // Parse the input data and load it in the root data dictionary.
+        this.ParseInputData();
 
         // Traverse the data structure and expand the template on every level as defined.
         // The content of the data file is added along with the data from the directories above and passed to the template.
@@ -118,6 +123,27 @@ public class MustacheDirectoryExpand : Microsoft.Build.Utilities.Task
 
         File.WriteAllText(Path.Combine(outputDirectory, this.DefaultDestinationFileName), renderedTemplate?.TrimEnd());
         return true;
+    }
+
+    private void ParseInputData()
+    {
+        if (string.IsNullOrEmpty(this.InputData))
+        {
+            return;
+        }
+
+        var data = this.InputData.Split(';');
+        foreach (var item in data)
+        {
+            var keyValue = item.Split('=');
+            if (keyValue.Length != 2)
+            {
+                this.Log.LogError($"Invalid input data, '{item}'.");
+                continue;
+            }
+
+            this.rootData.Add(keyValue[0], keyValue[1]);
+        }
     }
 
     private void NormalizePaths()

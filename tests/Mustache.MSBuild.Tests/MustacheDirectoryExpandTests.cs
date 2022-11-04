@@ -16,6 +16,25 @@ public class MustacheDirectoryExpandTests
     }
 
     [Fact]
+    public void Execute_GlobalDataDirectoryExpansion_Success()
+    {
+        var task = new MustacheDirectoryExpand
+        {
+            BuildEngine = this.buildEngineMock.Object,
+            TemplateFile = "mustache-templates/directory.mustache",
+            LeafExpansion = false,
+            InputData = "GlobalData=GlobalDataValue",
+        };
+
+        var result = task.Execute();
+
+        Assert.True(result);
+
+        var contents = File.ReadAllText("1.1/expanded.txt");
+        Assert.Contains("GlobalDataValue", contents, StringComparison.InvariantCulture);
+    }
+
+    [Fact]
     public void Execute_DefaultParametersDirectoryExpansion_Success()
     {
         var task = new MustacheDirectoryExpand
