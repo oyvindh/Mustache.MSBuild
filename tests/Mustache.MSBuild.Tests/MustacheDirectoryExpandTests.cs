@@ -23,7 +23,7 @@ public class MustacheDirectoryExpandTests
             BuildEngine = this.buildEngineMock.Object,
             TemplateFile = "mustache-templates/directory.mustache",
             LeafExpansion = false,
-            InputData = "GlobalData=GlobalDataValue",
+            InputData = "GlobalKey1=GlobalDataValue1;GlobalKey2=GlobalDataValue2",
         };
 
         var result = task.Execute();
@@ -31,7 +31,8 @@ public class MustacheDirectoryExpandTests
         Assert.True(result);
 
         var contents = File.ReadAllText("1.1/expanded.txt");
-        Assert.Contains("GlobalDataValue", contents, StringComparison.InvariantCulture);
+        Assert.Contains("GlobalDataValue1", contents, StringComparison.InvariantCulture);
+        Assert.Contains("GlobalDataValue2", contents, StringComparison.InvariantCulture);
     }
 
     [Fact]

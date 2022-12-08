@@ -25,7 +25,7 @@ public class MustacheExpandTests
         var task = new MustacheExpand
         {
             BuildEngine = this.buildEngineMock.Object,
-            TeamplateFile = "mustache-templates/simple.mustache",
+            TemplateFile = "mustache-templates/simple.mustache",
             DataFile = "data/simple.json",
             DestinationFile = "result.json",
         };
@@ -42,6 +42,34 @@ public class MustacheExpandTests
         Assert.True(result);
         Assert.NotNull(item);
         Assert.False(string.IsNullOrEmpty(item?.Name), "Expected name to be non-empty");
+        Assert.Equal("Some name", item?.Name);
+    }
+
+    [Fact]
+    public void Execute_SimpleTemplateWithInputOverride_Success()
+    {
+        var task = new MustacheExpand
+        {
+            BuildEngine = this.buildEngineMock.Object,
+            TemplateFile = "mustache-templates/simple.mustache",
+            DataFile = "data/simple.json",
+            InputData = "name=Override",
+            DestinationFile = "result.json",
+        };
+
+        var result = task.Execute();
+
+        var item = JsonSerializer.Deserialize<SimpleItem>(
+            File.ReadAllText(task.DestinationFile),
+            new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+            });
+
+        Assert.True(result);
+        Assert.NotNull(item);
+        Assert.False(string.IsNullOrEmpty(item?.Name), "Expected name to be non-empty");
+        Assert.Equal("Override", item?.Name);
     }
 }
 

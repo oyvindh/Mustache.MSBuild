@@ -10,7 +10,7 @@ using System.Text.Json;
 public class MustacheExpand : Microsoft.Build.Utilities.Task
 {
     [Required]
-    public string TeamplateFile { get; set; } = "template.mustache";
+    public string TemplateFile { get; set; } = "template.mustache";
 
     [Required]
     public string DataFile { get; set; } = "data.json";
@@ -18,12 +18,20 @@ public class MustacheExpand : Microsoft.Build.Utilities.Task
     [Required]
     public string DestinationFile { get; set; } = "expanded.txt";
 
+    public string InputData { get; set; } = string.Empty;
+
     public override bool Execute()
     {
-        var templateString = File.ReadAllText(this.TeamplateFile);
+        var templateString = File.ReadAllText(this.TemplateFile);
         using var dataStream = File.OpenRead(this.DataFile);
-        var dataObject = JsonSerializer.Deserialize<Dictionary<string, object>>(dataStream);
-        var expandedTemplate = Template.Compile(templateString).Render(dataObject);
+        var rootDict = JsonSerializer.Deserialize<Dictionary<string, object>>(dataStream);
+        var inputDictionary = InputParser.Parse(this.InputData);
+
+        var mergedDict = new[] { rootDict, inputDictionary }
+            .SelectMany(dict => dict)
+            .ToLookup(pair => pair.Key, pair => pair.Value)
+            .ToDictionary(group => group.Key, group => group.Last());
+        var expandedTemplate = Template.Compile(templateString).Render(mergedDict);
 
         File.WriteAllText(this.DestinationFile, expandedTemplate);
         return true;

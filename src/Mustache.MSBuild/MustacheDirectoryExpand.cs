@@ -51,10 +51,15 @@ public class MustacheDirectoryExpand : Microsoft.Build.Utilities.Task
         }
 
         using var dataStream = File.OpenRead(rootDataFile);
-        this.rootData = JsonSerializer.Deserialize<Dictionary<string, object>>(dataStream);
+        var rootDict = JsonSerializer.Deserialize<Dictionary<string, object>>(dataStream);
 
-        // Parse the input data and load it in the root data dictionary.
-        this.ParseInputData();
+        // Parse the input data and merge it with the root data dictionary. Giving precedence to the input data.
+        var inputDictionary = InputParser.Parse(this.InputData);
+
+        this.rootData = new[] { rootDict, inputDictionary }
+            .SelectMany(dict => dict)
+            .ToLookup(pair => pair.Key, pair => pair.Value)
+            .ToDictionary(group => group.Key, group => group.Last());
 
         // Traverse the data structure and expand the template on every level as defined.
         // The content of the data file is added along with the data from the directories above and passed to the template.
@@ -123,32 +128,6 @@ public class MustacheDirectoryExpand : Microsoft.Build.Utilities.Task
 
         File.WriteAllText(Path.Combine(outputDirectory, this.DefaultDestinationFileName), renderedTemplate?.TrimEnd());
         return true;
-    }
-
-    private void ParseInputData()
-    {
-        if (string.IsNullOrEmpty(this.InputData))
-        {
-            return;
-        }
-
-        var data = this.InputData.Split(';');
-        foreach (var item in data)
-        {
-            var keyValue = item.Split('=');
-            if (keyValue.Length != 2)
-            {
-                this.Log.LogError($"Invalid input data, '{item}'.");
-                continue;
-            }
-
-            if (this.rootData == null)
-            {
-                this.rootData = new Dictionary<string, object>();
-            }
-
-            this.rootData.Add(keyValue[0], keyValue[1]);
-        }
     }
 
     private void NormalizePaths()

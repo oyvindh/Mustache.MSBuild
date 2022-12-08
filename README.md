@@ -14,8 +14,12 @@ There are two main ways to run this. The most simple, is to use the `MustacheExp
 ```xml
 <MustacheExpand
     TemplateFile="mustache-templates/simple.mustache"
-    DataFile="simple.json" />
+    DataFile="simple.json"
+    InputData="data1=value1"
+    DestinationFile="expanded.txt"/>
 ```
+
+> `InputData` will append to the data set or override values defined in the `DataFile`
 
 ## MustacheDirectoryExpand task
 
