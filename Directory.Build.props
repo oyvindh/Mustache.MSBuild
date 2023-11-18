@@ -3,7 +3,7 @@
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
 
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>true</ImplicitUsings>
     <LangVersion>latest</LangVersion>
@@ -14,10 +14,10 @@
   </PropertyGroup>
 
   <PropertyGroup Label="Assembly Info">
-    <Company>Microsoft Corporation</Company>
-    <Copyright>Copyright © $([System.DateTime]::Now.ToString(yyyy)) Microsoft Corporation. All rights reserved.</Copyright>
-    <Product Condition="'$(PublicRelease)'!='true'">Microsoft ® - Private (Built by $(USERNAME) on $(COMPUTERNAME)).</Product>
-    <Product Condition="'$(PublicRelease)'=='true'">Microsoft ® $(MSBuildProjectName)</Product>
+    <Company>HIC</Company>
+    <Copyright>Copyright © $([System.DateTime]::Now.ToString(yyyy)) HIC. All rights reserved.</Copyright>
+    <Product Condition="'$(PublicRelease)'!='true'">HIC ® - Private (Built by $(USERNAME) on $(COMPUTERNAME)).</Product>
+    <Product Condition="'$(PublicRelease)'=='true'">HIC ® $(MSBuildProjectName)</Product>
   </PropertyGroup>
 
   <PropertyGroup Label="Publish Customizations">
@@ -52,7 +52,7 @@
   <ItemGroup Label="Dockerfile Publish Convention">
     <None Include="Dockerfile" CopyToOutputDirectory="PreserveNewest" Condition="Exists('Dockerfile')" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <PackageReference Include="Nerdbank.GitVersioning" Version="3.4.255" PrivateAssets="All" />
     <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.0.64">

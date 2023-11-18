@@ -99,7 +99,7 @@ public class MustacheDirectoryExpandTests
     }
 }
 
-internal class DirectoryTree
+internal sealed class DirectoryTree
 {
     public DirectoryTree(IReadOnlyCollection<Directory> children)
     {
@@ -109,7 +109,7 @@ internal class DirectoryTree
     public IReadOnlyCollection<Directory> Children { get; }
 }
 
-internal class Directory
+internal sealed class Directory
 {
     [JsonConstructor]
     public Directory(string name, IReadOnlyCollection<Directory> children)
