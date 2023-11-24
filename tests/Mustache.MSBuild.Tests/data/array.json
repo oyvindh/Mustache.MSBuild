@@ -1,0 +1,7 @@
+{
+  "list": [
+    { "name": "resque" },
+    { "name": "hub" },
+    { "name": "rip" }
+  ]
+}
