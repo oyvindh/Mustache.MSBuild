@@ -24,7 +24,8 @@ public class MustacheExpand : Microsoft.Build.Utilities.Task
     {
         var templateString = File.ReadAllText(this.TemplateFile);
         using var dataStream = File.OpenRead(this.DataFile);
-        var rootDict = JsonSerializer.Deserialize<Dictionary<string, object>>(dataStream);
+        var rootDict =
+            InputParser.RecursiveDeserialize(JsonSerializer.Deserialize<Dictionary<string, object>>(dataStream));
         var inputDictionary = InputParser.Parse(this.InputData);
 
         var mergedDict = new[] { rootDict, inputDictionary }
@@ -36,4 +37,6 @@ public class MustacheExpand : Microsoft.Build.Utilities.Task
         File.WriteAllText(this.DestinationFile, expandedTemplate);
         return true;
     }
+
+
 }

@@ -3,5 +3,10 @@
     { "name": "resque" },
     { "name": "hub" },
     { "name": "rip" }
+  ],
+  "implicitIterator": [
+    "resque",
+    "hub",
+    "rip"
   ]
 }

@@ -51,7 +51,7 @@ public class MustacheDirectoryExpand : Microsoft.Build.Utilities.Task
         }
 
         using var dataStream = File.OpenRead(rootDataFile);
-        var rootDict = JsonSerializer.Deserialize<Dictionary<string, object>>(dataStream);
+        var rootDict = InputParser.RecursiveDeserialize(JsonSerializer.Deserialize<Dictionary<string, object>>(dataStream));
 
         // Parse the input data and merge it with the root data dictionary. Giving precedence to the input data.
         var inputDictionary = InputParser.Parse(this.InputData);
@@ -100,7 +100,7 @@ public class MustacheDirectoryExpand : Microsoft.Build.Utilities.Task
         if (File.Exists(dataFile))
         {
             using var dataStream = File.OpenRead(dataFile);
-            var data = JsonSerializer.Deserialize<Dictionary<string, object>>(dataStream);
+            var data = InputParser.RecursiveDeserialize(JsonSerializer.Deserialize<Dictionary<string, object>>(dataStream));
             if (data != null)
             {
                 mergedData = data.Concat(parentData.Where(x => !data.ContainsKey(x.Key)));
