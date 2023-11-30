@@ -51,7 +51,8 @@ public class MustacheDirectoryExpand : Microsoft.Build.Utilities.Task
         }
 
         using var dataStream = File.OpenRead(rootDataFile);
-        var rootDict = InputParser.RecursiveDeserialize(JsonSerializer.Deserialize<Dictionary<string, object>>(dataStream));
+        var rootDict =
+            InputParser.RecursiveDeserialize(JsonSerializer.Deserialize<Dictionary<string, object>>(dataStream) ?? throw new InvalidOperationException());
 
         // Parse the input data and merge it with the root data dictionary. Giving precedence to the input data.
         var inputDictionary = InputParser.Parse(this.InputData);
@@ -95,12 +96,13 @@ public class MustacheDirectoryExpand : Microsoft.Build.Utilities.Task
             parentData = this.rootData;
         }
 
-        var mergedData = parentData.Select(kv => kv);
+        var mergedData = (parentData ?? throw new InvalidOperationException()).Select(kv => kv);
         var dataFile = Path.Combine(this.DataRootDirectory, node.GetIdentifierChain(), this.DefaultDataFileName);
         if (File.Exists(dataFile))
         {
             using var dataStream = File.OpenRead(dataFile);
-            var data = InputParser.RecursiveDeserialize(JsonSerializer.Deserialize<Dictionary<string, object>>(dataStream));
+            var data =
+                InputParser.RecursiveDeserialize(JsonSerializer.Deserialize<Dictionary<string, object>>(dataStream) ?? throw new InvalidOperationException());
             if (data != null)
             {
                 mergedData = data.Concat(parentData.Where(x => !data.ContainsKey(x.Key)));

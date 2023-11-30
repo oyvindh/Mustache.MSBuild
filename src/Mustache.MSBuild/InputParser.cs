@@ -48,23 +48,29 @@ internal class InputParser
             case JsonValueKind.Array:
                 var list = JsonSerializer.Deserialize<List<object>>(element.ToString());
 
-                var newList = new List<object>(list.Count);
-
-                foreach (var listElement in list)
+                if (list != null)
                 {
-                    if (listElement is JsonElement jsonElement)
+                    var newList = new List<object>(list.Count);
+
+                    foreach (var listElement in list)
                     {
-                        newList.Add(ParseElement(jsonElement));
+                        if (listElement is JsonElement jsonElement)
+                        {
+                            newList.Add(ParseElement(jsonElement));
+                        }
+                        else
+                        {
+                            newList.Add(listElement);
+                        }
                     }
-                    else
-                    {
-                        newList.Add(listElement);
-                    }
+
+                    return newList;
                 }
 
-                return newList;
+                throw new InvalidOperationException();
+
             case JsonValueKind.Object:
-                return RecursiveDeserialize(JsonSerializer.Deserialize<Dictionary<string, object>>(element.ToString()));
+                return RecursiveDeserialize(JsonSerializer.Deserialize<Dictionary<string, object>>(element.ToString()) ?? throw new InvalidOperationException());
             default:
                 return element;
         }
