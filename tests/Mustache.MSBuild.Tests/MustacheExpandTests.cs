@@ -71,6 +71,28 @@ public class MustacheExpandTests
         Assert.False(string.IsNullOrEmpty(item?.Name), "Expected name to be non-empty");
         Assert.Equal("Override", item?.Name);
     }
+
+    [Fact]
+    public void Execute_Array_Success()
+    {
+        var task = new MustacheExpand
+        {
+            BuildEngine = this.buildEngineMock.Object,
+            TemplateFile = "mustache-templates/array.mustache",
+            DataFile = "data/array.json",
+            DestinationFile = "result.html",
+        };
+
+        var result = task.Execute();
+
+        var actual = File.ReadAllText(task.DestinationFile);
+        var expected = File.ReadAllText("expected_results/array.html");
+
+        Assert.True(result);
+        Assert.NotNull(actual);
+        Assert.NotNull(expected);
+        Assert.Equal(expected, actual);
+    }
 }
 
 public class SimpleItem

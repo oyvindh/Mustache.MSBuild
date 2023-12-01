@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 env:
-    publicRelease: "${{ github.ref == 'refs/heads/main' && 'True' || 'False' }}"
+    publicRelease: "${{ github.ref == 'refs/heads/main' && 'true' || 'false' }}"
     configuration: "${{ github.ref == 'refs/heads/main' && 'Release' || 'Debug' }}"
 
 jobs:
@@ -29,14 +29,14 @@ jobs:
     - name: Test
       run: dotnet test --configuration $configuration --no-restore --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura
     - name: Package NuGet
-      if: ${{ env.publicRelease }}
+      if: env.publicRelease == true
       run: dotnet pack --no-restore --no-build --configuration $configuration -o packages
     - name: Set package version
-      if: ${{ env.publicRelease }}
+      if: env.publicRelease == true
       id: setPackageVersion
       run: echo "::set-output name=packageVersion::$BUILD_VERSION"
     - uses: actions/upload-artifact@v3
-      if: ${{ env.publicRelease }}
+      if: env.publicRelease == true
       with:
         name: packages-drop
         path: |
@@ -45,16 +45,15 @@ jobs:
   nuget-release:
     runs-on: ubuntu-latest
     needs: build
+    if: env.publicRelease == true
     steps:
     - uses: actions/download-artifact@v3
-      if: ${{ env.publicRelease }}
       with:
         name: packages-drop
         path: packages
     - name: Display structure of downloaded files
       run: ls -R
     - uses: actions/setup-dotnet@v1.7.2
-      if: ${{ env.publicRelease }}
     - name: Publish NuGet Package
       run: dotnet nuget push packages/Hic.Mustache.MSBuild.${{ needs.build.outputs.packageVersion }}.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
 
