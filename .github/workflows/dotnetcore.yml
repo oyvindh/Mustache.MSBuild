@@ -7,8 +7,8 @@ on:
     branches: [ main ]
 
 env:
-    publicRelease: "${{ github.ref == 'refs/heads/main' && 'true' || 'false' }}"
-    configuration: "${{ github.ref == 'refs/heads/main' && 'Release' || 'Debug' }}"
+    publicRelease: ${{ github.ref == 'refs/heads/main' && true || false }}
+    configuration: ${{ github.ref == 'refs/heads/main' && 'Release' || 'Debug' }}
 
 jobs:
   build:
@@ -29,14 +29,14 @@ jobs:
     - name: Test
       run: dotnet test --configuration $configuration --no-restore --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura
     - name: Package NuGet
-      if: env.publicRelease == true
+      if: env.publicRelease
       run: dotnet pack --no-restore --no-build --configuration $configuration -o packages
     - name: Set package version
-      if: env.publicRelease == true
+      if: env.publicRelease
       id: setPackageVersion
-      run: echo "::set-output name=packageVersion::$BUILD_VERSION"
+      run: echo "packageVersion=$BUILD_VERSION" >> $GITHUB_OUTPUT
     - uses: actions/upload-artifact@v3
-      if: env.publicRelease == true
+      if: env.publicRelease
       with:
         name: packages-drop
         path: |
