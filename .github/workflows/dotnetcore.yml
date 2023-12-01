@@ -43,9 +43,9 @@ jobs:
           packages/*.nupkg
 
   nuget-release:
+    if: ${{ github.ref == 'refs/heads/main' && true || false }} # can't use env in this context, so need to re evaluate
     runs-on: ubuntu-latest
     needs: build
-    if: env.publicRelease == true
     steps:
     - uses: actions/download-artifact@v3
       with:
