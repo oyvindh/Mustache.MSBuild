@@ -16,11 +16,11 @@ jobs:
     outputs:
       packageVersion: ${{ steps.setPackageVersion.outputs.packageVersion }}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
     - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1.7.2
+      uses: actions/setup-dotnet@v3
 
     - name: Install dependencies
       run: dotnet restore
@@ -53,7 +53,7 @@ jobs:
         path: packages
     - name: Display structure of downloaded files
       run: ls -R
-    - uses: actions/setup-dotnet@v1.7.2
+    - uses: actions/setup-dotnet@v3
     - name: Publish NuGet Package
       run: dotnet nuget push packages/Hic.Mustache.MSBuild.${{ needs.build.outputs.packageVersion }}.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
 
