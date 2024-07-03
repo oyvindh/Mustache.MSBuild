@@ -7,10 +7,12 @@
     <description>MSBuild tasks for expanding Mustache templates build-time.</description>
     <Product>Hic.Mustache.MSBuild</Product>
     <PackageTags>msbuild;mustache</PackageTags>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
 
   <ItemGroup>
     <Content Include="build\*" PackagePath="build\" />
+    <None Include="../../LICENSE" Pack="true" PackagePath="" />
   </ItemGroup>
 
   <ItemGroup>
