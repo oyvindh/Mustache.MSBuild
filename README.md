@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/github/license/oyvindh/Mustache.MSBuild.svg?color=blue)](https://github.com/oyvindh/Mustache.MSBuild/blob/main/LICENSE)
 [![Build](https://github.com/oyvindh/Mustache.MSBuild/workflows/.NET%20Core/badge.svg?branch=main)](https://github.com/oyvindh/Mustache.MSBuild/actions)
-[![Version](https://img.shields.io/nuget/v/Hic.Mustache.MSBuild.svg?color=royalblue)](https://www.nuget.org/packages/Mustache.MSBuild)
+[![Version](https://img.shields.io/nuget/v/Hic.Mustache.MSBuild.svg?color=royalblue)](https://www.nuget.org/packages/Hic.Mustache.MSBuild)
 [![Downloads](https://img.shields.io/nuget/dt/Hic.Mustache.MSBuild.svg?color=green)](https://www.nuget.org/packages/Hic.Mustache.MSBuild)
 
 This repository contains the code for MSBuild tasks that allow the expansion of Mustache templates during the build. Typically useful if you do any infrastructure as code with MSBuild or simply need to generate some files.
